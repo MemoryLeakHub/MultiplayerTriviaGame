@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
-import { Application, Sprite, Container } from "pixi.js";
+import { Application, Sprite, Container, State } from "pixi.js";
 import { BoardTile, BoardTileConfig, TileType } from "./BoardTile";
 import { tilesList } from "./Tiles";
 import GameUI from "./GameUI";
@@ -17,6 +17,8 @@ function App() {
   const [preLoadProgress, setPreLoadProgress] = useState(0);
   const [isLogged, setIsLogged] = useState(false)
   const [showLogin, setShowLoign] = useState(false)
+  const [showLobby, setShowLobby] = useState(false)
+  const [assetsFinishedLoading, setAssetsFInishedLoading] = useState(false)
   let playeDataList: PlayerLobbyData[] = 
   [{
     isMaster: true,
@@ -31,6 +33,18 @@ function App() {
     isBot:false
   }
   ]
+
+  const {
+    state: {
+      status = "",
+      playerIdToPlayerState = {}
+    } = {},
+    roomStartContext,
+    players = [], finished,
+  } = roomState;
+
+  const dataLoading = roomState == null || curPlr == null;
+  
   const handleClick = (event: any) => {
     setCount(count + 1);
 
@@ -39,6 +53,7 @@ function App() {
       currentTile.onTileChange(count)
     }
   };
+  
   useEffect(() => {
     const onStateChanged = (newBoardGame) => {
       setRoomState(newBoardGame);
@@ -48,13 +63,31 @@ function App() {
       client.events.off('stateChanged', onStateChanged);
     };
   }, []);
+
   useEffect(() => {
-    const setupCurPlr = async () => {
-      const newCurPlr = await client.getLocalPlayer();
-      setCurPlr(newCurPlr);
-    };
-    setupCurPlr();
-  }, []);
+    console.log("hereee 1")
+    if (!assetsFinishedLoading) {
+      return;
+    }
+    console.log("hereee 2")
+    
+    if (!dataLoading) {
+      return;
+    }
+    console.log("hereee 3")
+
+    const currentPlayer = roomState.playerIdToPlayerState[curPlr.id]
+    if (status === "PrepGame") {
+      console.log("hereee 4")
+      if (currentPlayer.status === "Login")  {
+        setShowLoign(true)
+      } else if (currentPlayer.status === "Lobby") {
+        setShowLobby(true)
+      }
+    }
+
+  }, [assetsFinishedLoading, dataLoading, status]);
+
   useEffect(() => {
     // On first render create our application
     const game = new Application({
@@ -62,6 +95,14 @@ function App() {
       width: 1200,
       height: 720
     });
+
+    const setupCurPlr = async () => {
+      const newCurPlr = await client.getLocalPlayer();
+      setCurPlr(newCurPlr);
+
+      client.makeMove({ username: "test user" })
+    };
+    setupCurPlr();
 
     // Start the PixiJS app
     game.start();
@@ -73,9 +114,9 @@ function App() {
     ].forEach(r => { game.loader.add(r); });
     game.loader.onProgress.add((loader, resources) => { 
       setPreLoadProgress(loader.progress)
-            if (loader.progress == 100) {
-              setShowLoign(true)
-            }
+      if (loader.progress == 100) {
+        setAssetsFInishedLoading(true)
+      }
     });
     game.loader.load((loader, resources) => {
       
@@ -120,7 +161,7 @@ function App() {
       <div className="m-auto">
         <canvas ref={canvasEle} />
         <div className="w-[1200px] h-[720px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          {(true) ? // is not logged
+          {(!showLobby) ? // is not logged
              <GameUiLogin preLoadProgress={preLoadProgress} showLogin={showLogin} /> 
              : 
              <GameUILobby playerLobbyData={playeDataList} /> 
