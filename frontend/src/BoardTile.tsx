@@ -19,6 +19,15 @@ export interface BoardTileConfig {
   tileType: TileType;
   resources: any;
 }
+
+export interface Player {
+  status: string,
+  isBot: boolean,
+  isMaster: boolean,
+  type: TileType,
+  mapSections: [],
+  battleForTile: []
+}
 const style = new TextStyle({
   fontFamily: 'Arial',
   fontSize: 36,
@@ -40,6 +49,11 @@ export class BoardTile {
   public container: Container = new Container();
   public animationContainer: Container = new Container();
   public textContainer: Container = new Container();
+  public battlePeonContainer: Container = new Container();
+
+  greenPeon: Sprite
+  redPeon:Sprite
+  bluePeon:Sprite
 
   ticker: Ticker = Ticker.shared
   circle = new Graphics();
@@ -90,23 +104,48 @@ export class BoardTile {
     this.textContainer.addChild(this.worthText)
     this.textContainer.pivot.x = this.textContainer.width/2;
     this.textContainer.pivot.y = this.textContainer.height/2
+
+    this.greenPeon = this.getPeonByType(TileType.PLAYER_GREEN)
+    this.greenPeon.alpha = 0
+    this.bluePeon = this.getPeonByType(TileType.PLAYER_BLUE)
+    this.bluePeon.alpha = 0
+    this.redPeon = this.getPeonByType(TileType.PLAYER_RED)
+    this.redPeon.alpha = 0
+
+    this.battlePeonContainer.addChild(this.greenPeon)
+    this.battlePeonContainer.addChild(this.bluePeon)
+    this.battlePeonContainer.addChild(this.redPeon)
     if (props.config.xInner != -1) {
       this.textContainer.x = props.config.xInner;
       this.xTileSprite.x = props.config.xInner;
+      this.greenPeon.x = props.config.xInner;
+      this.bluePeon.x = props.config.xInner-10;
+      this.redPeon.x = props.config.xInner+10;
     } else {
       this.textContainer.x = this.container.width/2;
       this.xTileSprite.x = this.container.width/2;
+      this.greenPeon.x = this.container.width/2;
+      this.bluePeon.x = this.container.width/2-10;
+      this.redPeon.x = this.container.width/2+10;
     }
     if (props.config.yInner != -1) {
       this.xTileSprite.y = props.config.yInner;
       this.textContainer.y = props.config.yInner;
+      this.greenPeon.y = props.config.yInner;
+      this.bluePeon.y = props.config.yInner;
+      this.redPeon.y = props.config.yInner;
     } else {
       this.xTileSprite.y = this.container.height/2;
       this.textContainer.y = this.container.height/2;
+      this.greenPeon.y = this.container.height/2;
+      this.bluePeon.y = this.container.height/2;
+      this.redPeon.y = this.container.height/2;
     }
-    
+  
+
     //this.container.addChild(this.xTileSprite);
     this.container.addChild(this.textContainer);
+    this.container.addChild(this.battlePeonContainer);
   }
 
   // Because we are changing the [x,y] position of our boardContainer wrapper
@@ -163,6 +202,36 @@ export class BoardTile {
     }
     this.roomStateLocal = roomState
     this.updateWorthText(roomState)
+
+    this.updateBattlePeon(roomState)
+   
+  }
+
+  private updateBattlePeon(roomState) {
+    // reset peons
+    this.bluePeon.alpha = 0
+    this.redPeon.alpha = 0
+    this.greenPeon.alpha = 0
+
+    console.log(roomState.state.playerIdToPlayerState)
+  
+    const players = roomState.state.playerIdToPlayerState as Map<string, Player>
+    Object.values(players).forEach(player => {
+      const playerHasTileInBattle = player.battleForTile.includes( this.props.config.tilePosition)
+      console.log("playerHasTileInBattle : ", playerHasTileInBattle)
+      console.log("this.props.config.tilePosition : ", this.props.config.tilePosition)
+      console.log("player.battleForTile : ",player.battleForTile)
+      if (player.battleForTile.length != 0 && playerHasTileInBattle ) {
+        if (player.type == TileType.PLAYER_BLUE) {
+          this.bluePeon.alpha = 1
+        } else if (player.type == TileType.PLAYER_GREEN)  {
+          this.greenPeon.alpha = 1
+        } else {
+          this.redPeon.alpha = 1;
+        }
+      } 
+    });
+     
   }
   private updateWorthText(roomState: any) { 
     // console.log("this.props.roomState.mapConnectedSections")
@@ -275,6 +344,25 @@ export class BoardTile {
     }
   }
 
+  // 
+  private getPeonByType(type: TileType) {
+    const sheetAtlas = this.props.config.resources["./assets/peons.json"];
+    let peon = "red_peon.png";
+    switch (type) {
+      case TileType.PLAYER_BLUE:
+        peon = "blue_peon.png";
+        break;
+      case TileType.PLAYER_GREEN:
+        peon = "green_peon.png";
+        break;
+    }
+
+    const sprite = new Sprite(
+      sheetAtlas.textures[peon]
+    );
+    return sprite;
+
+  }
   private getAtlasFromTilePosition() {
     const tilePosition = this.props.config.tilePosition;
     let atlas = "./assets/atlas_tiles_13.json";

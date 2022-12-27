@@ -1,6 +1,12 @@
 import {
-  getRandomItemFromArray, removeItem
+  getRandomItemFromArray, removeItem, getRandomNElementsFromArray
 } from './utils';
+
+const PlayerType = Object.freeze({
+  RED: 0,
+  BLUE: 1,
+  GREEN: 2
+});
 
 const GameStatus = Object.freeze({
   PrepGame: 'PrepGame',
@@ -103,7 +109,7 @@ function onRoomStart(roomState) {
     }
   }
 }
-
+// 0 - red,1 - blue,2 - green
 function onPlayerJoin(player, roomState) {
   const { state, logger } = roomState
   logger.info('Join called with:', { player, state })
@@ -113,6 +119,7 @@ function onPlayerJoin(player, roomState) {
   if (playerState === undefined) {
     state.playerIdToPlayerState[player.id] = {
       status: PlayerStatus.Login,
+      type: PlayerType.BLUE,
       isBot: false,
       isMaster: false,
       mapSections: [],
@@ -169,7 +176,8 @@ function onLoginMove(player, move, roomState) {
     isBot: true,
     isMaster: false,
     mapSections: [],
-    battleForTile: []
+    battleForTile: [],
+    type: PlayerType.RED,
   }
   state.playerIdToPlayerState["bot_1"].username = "John"
   state.playerIdToPlayerState["bot_2"] = {
@@ -177,7 +185,8 @@ function onLoginMove(player, move, roomState) {
     isBot: true,
     isMaster: false,
     mapSections: [],
-    battleForTile: []
+    battleForTile: [],
+    type: PlayerType.GREEN
   }
   state.playerIdToPlayerState["bot_2"].username = "Tom"
 
@@ -211,7 +220,7 @@ function chooseTileAndRemove(state, entity) {
   entity.mapSections.push(randomAvailableTile)
 }
 function chooseTileWithBotEmpty(state, bot) { 
-  var randomElements = getRandomNElementsFromArray(state.emptyMapSections)
+  var randomElements = getRandomNElementsFromArray(state.emptyMapSections, 2)
   bot.battleForTile = randomElements
 }
 function checkIfAllPlayersHaveSelectedTiles(roomState) { 

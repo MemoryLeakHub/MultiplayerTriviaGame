@@ -25,6 +25,7 @@ function App() {
   const {
     state: {
       status = "",
+      gamePhase = "",
       playerIdToPlayerState = {},
       mapConnectedSections = [],
       phaseTimerStart = null,
@@ -83,8 +84,6 @@ function App() {
   }, [phaseTimerStart, phaseTimerTotal ]);
 
   
-
-
   useEffect(() => {
     const onStateChanged = (newBoardGame) => {
       console.log("state changed")
@@ -97,6 +96,7 @@ function App() {
     };
   }, []);
 
+  // on gamestate phase change
   useEffect(() => {
     if (!assetsFinishedLoading) {
       return;
@@ -111,11 +111,15 @@ function App() {
       } else if (currentPlayer.status === "Lobby") {
         setShowLobby(true)
       }
+    } else if (status === "InGame") {
+      if (gamePhase === "PickEmptyTile") {
+        
+      }
     }
 
     console.log("updated roomState 222 ")
     console.log(roomState)
-  }, [assetsFinishedLoading, roomState, curPlr]);
+  }, [assetsFinishedLoading, status, gamePhase, curPlr, playerIdToPlayerState]);
 
   useEffect(() => {
     if (tiles != null) {
@@ -160,6 +164,7 @@ function App() {
       "./assets/atlas_tiles_12.json",
       "./assets/atlas_tiles_13.json",
       "./assets/atlas_tiles_14.json",
+      "./assets/peons.json",
       "./assets/x_tile.png"
     ].forEach(r => { game.loader.add(r); });
     game.loader.onProgress.add((loader, resources) => { 

@@ -1,6 +1,6 @@
 {
   "frames": {
-    "red_pion.png": {
+    "red_peon.png": {
       "frame": {
         "x": 0,
         "y": 0,
@@ -24,7 +24,7 @@
         "y": 0.5
       }
     },
-    "blue_pion.png": {
+    "blue_peon.png": {
       "frame": {
         "x": 0,
         "y": 40,
@@ -48,7 +48,7 @@
         "y": 0.5
       }
     },
-    "green_pion.png": {
+    "green_peon.png": {
       "frame": {
         "x": 0,
         "y": 79,
@@ -76,7 +76,7 @@
   "meta": {
     "app": "http://free-tex-packer.com",
     "version": "0.6.7",
-    "image": "pions.png",
+    "image": "peons.png",
     "format": "RGBA8888",
     "size": {
       "w": 36,
