@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 
-function GameUiLogin({preLoadProgress, showLogin}: {preLoadProgress: number, showLogin: boolean}) {
+function GameUiLogin({preLoadProgress, showLogin, onLoginClick}: {preLoadProgress: number, showLogin: boolean, onLoginClick: any}) {
+  const [username, setUsername] = useState("");
 
   const currentProgress = preLoadProgress
   const progressStyle = {
@@ -27,8 +28,12 @@ function GameUiLogin({preLoadProgress, showLogin}: {preLoadProgress: number, sho
             }`}
           >
           <div className="w-[290px] m-auto transition-all">
-            <input className="shadow appearance-none border rounded w-[200px] h-[50px] h-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" type="text" placeholder="Username" />
-            <button type="button" className=" btn btn-hollow h-[47px] w-[80px] ml-2" > Login </button>
+            <input className="shadow appearance-none border rounded w-[200px] h-[50px] h-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" type="text" placeholder="Username"
+              onChange={(e) => {
+                setUsername(e.target.value)
+               }}
+            />
+            <button type="button" className=" btn btn-hollow h-[47px] w-[80px] ml-2" onClick={()=> {onLoginClick(username)}}> Login </button>
           </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { Container, Sprite, Graphics, BLEND_MODES, filters, Ticker } from "pixi.js";
+import { Container, Sprite, Graphics, BLEND_MODES, filters, Ticker, TextStyle, Text, uniformParsers } from "pixi.js";
 
 export enum TileType {
   PLAYER_RED,
@@ -11,26 +11,49 @@ export enum TileAnimationState {
   NONE
 }
 export interface BoardTileConfig {
+  xInner: number;
+  yInner: number;
   x: number;
   y: number;
   tilePosition: number;
   tileType: TileType;
   resources: any;
 }
-
+const style = new TextStyle({
+  fontFamily: 'Arial',
+  fontSize: 36,
+  fontStyle: 'italic',
+  fontWeight: 'bold',
+  fill: ['#ffffff'], // gradient
+  stroke: '#262626',
+  strokeThickness: 3,
+  dropShadow: true,
+  dropShadowColor: '#000000',
+  dropShadowBlur: 2,
+  dropShadowAngle: Math.PI / 6,
+  dropShadowDistance: 2,
+  wordWrap: true,
+  wordWrapWidth: 440,
+  lineJoin: 'round',
+});
 export class BoardTile {
   public container: Container = new Container();
   public animationContainer: Container = new Container();
+  public textContainer: Container = new Container();
 
   ticker: Ticker = Ticker.shared
   circle = new Graphics();
   tileSprite: Sprite
   tileAnimatedSprite: Sprite
+  xTileSprite: Sprite
   tileAnimationState: TileAnimationState  = TileAnimationState.NONE
   tileAnimationDurationSeconds: number = 2
   tileBlurFilter = [new filters.BlurFilter(8)]
   currentTileType: TileType = TileType.NONE
   isAnimating: Boolean = false
+ 
+  worthText = new Text("200", style);
+  roomStateLocal: any
   constructor(
     public props: {
       config: BoardTileConfig;
@@ -38,6 +61,7 @@ export class BoardTile {
       boardTilesContainer: Container;
     }
   ) {
+    
     //this.container.addChild(this.animationContainer);
     this.currentTileType = this.props.config.tileType
     this.ticker.autoStart = false;
@@ -49,13 +73,40 @@ export class BoardTile {
     this.tileAnimatedSprite = this.getTileSprite(atlas, this.props.config.tileType);
 
     this.initContainerSetup(true);
-
+    
 
     props.boardTilesContainer.addChild(this.container);
     this.container.on('pointerdown', (e: any) => {
       this.onTileClick(atlas);
     });
 
+    // x mark
+    this.xTileSprite = new Sprite(this.props.config.resources["./assets/x_tile.png"].texture);
+    this.xTileSprite.alpha = 1
+    this.xTileSprite.pivot.x = this.xTileSprite.width/2;
+    this.xTileSprite.pivot.y = this.xTileSprite.height/2
+
+    // text
+    this.textContainer.addChild(this.worthText)
+    this.textContainer.pivot.x = this.textContainer.width/2;
+    this.textContainer.pivot.y = this.textContainer.height/2
+    if (props.config.xInner != -1) {
+      this.textContainer.x = props.config.xInner;
+      this.xTileSprite.x = props.config.xInner;
+    } else {
+      this.textContainer.x = this.container.width/2;
+      this.xTileSprite.x = this.container.width/2;
+    }
+    if (props.config.yInner != -1) {
+      this.xTileSprite.y = props.config.yInner;
+      this.textContainer.y = props.config.yInner;
+    } else {
+      this.xTileSprite.y = this.container.height/2;
+      this.textContainer.y = this.container.height/2;
+    }
+    
+    //this.container.addChild(this.xTileSprite);
+    this.container.addChild(this.textContainer);
   }
 
   // Because we are changing the [x,y] position of our boardContainer wrapper
@@ -65,55 +116,84 @@ export class BoardTile {
       return;
     }
 
-      this.container.x = this.props.config.x - this.props.boardContainer.x;
-      this.container.y = this.props.config.y - this.props.boardContainer.y;
-      this.container.addChild(this.tileSprite);
-
+    this.container.x = this.props.config.x - this.props.boardContainer.x;
+    this.container.y = this.props.config.y - this.props.boardContainer.y;
+    this.tileSprite.zIndex = 1
+    if (isInitial) {
+    this.container.addChild(this.tileSprite);
+    }
+   
     if (this.currentTileType === this.props.config.tileType) {
       return;
     }
 
-    console.log("this.currentTileType : " + this.currentTileType)
-    console.log("this.props.config.tileType : " + this.props.config.tileType)
+    // console.log("this.currentTileType : " + this.currentTileType)
+    // console.log("this.props.config.tileType : " + this.props.config.tileType)
     this.currentTileType = this.props.config.tileType
 
-    const circleRadius = 35
+    // const circleRadius = 35
     
-    
-    this.circle.beginFill(0xffffff);
-    this.circle.drawCircle(0, 0, circleRadius);
-    this.circle.endFill();
-    this.circle.x = this.tileAnimatedSprite.width/2 + circleRadius;
-    this.circle.y = this.tileAnimatedSprite.height/2 + circleRadius;
-    this.circle.pivot.x = circleRadius;
-    this.circle.pivot.y = circleRadius;
-    this.circle.alpha = 0
-    this.setCircleSizeAndCenter(circleRadius*2,circleRadius*2)
-    console.log("this.circle.width : " + this.circle.width);
-    this.tileAnimatedSprite.filters = this.tileBlurFilter;
-    
-    this.container.addChild(this.tileAnimatedSprite);
-    this.container.addChild(this.circle);
-    console.log(this.container.children)
-    this.tileAnimatedSprite.mask = this.circle;
-    this.tileTransitionAnimation(2)
+    // this.circle.beginFill(0xffffff);
+    // this.circle.drawCircle(0, 0, circleRadius);
+    // this.circle.endFill();
+    // this.circle.x = this.tileAnimatedSprite.width/2 + circleRadius;
+    // this.circle.y = this.tileAnimatedSprite.height/2 + circleRadius;
+    // this.circle.pivot.x = circleRadius;
+    // this.circle.pivot.y = circleRadius;
+    // this.circle.alpha = 1
+    // this.circle.zIndex = 2
+    // this.setCircleSizeAndCenter(circleRadius*2,circleRadius*2)
 
+    // this.tileAnimatedSprite.filters = this.tileBlurFilter;
+    
+    // this.tileAnimatedSprite.zIndex = 3
+    // if (isInitial) {
+    //   this.container.addChild(this.tileAnimatedSprite);
+    //   this.container.addChild(this.circle);
+    //   this.tileAnimatedSprite.mask = this.circle;
+    // }
+   
+  
+    //this.tileTransitionAnimation(2)
+  }
+
+  updateState(roomState: any) { 
+    if (roomState === undefined) {
+      return;
+    }
+    this.roomStateLocal = roomState
+    this.updateWorthText(roomState)
+  }
+  private updateWorthText(roomState: any) { 
+    // console.log("this.props.roomState.mapConnectedSections")
+    // console.log(roomState)
+    const tile = roomState.state.mapConnectedSections[this.props.config.tilePosition-1]
+    if (tile.status === "ReTaken") {
+      this.worthText.text = "300"
+    } else  { 
+      this.worthText.text = "200"
+    }
+    this.worthText.zIndex = 4
   }
 
   onTileChange(count: number) {
-    console.log("current Number : " + count + " texture : " + this.tileSprite.texture.textureCacheIds)
+    //console.log("current Number : " + count + " texture : " + this.tileSprite.texture.textureCacheIds)
   }
   private onTileClick(atlas: any) { 
+    console.log(this.container.children)
     if (this.isAnimating) {
       return;
     }
     this.props.config.tileType = (this.props.config.tileType == TileType.PLAYER_BLUE) ? TileType.PLAYER_RED : TileType.PLAYER_BLUE
 
-    this.tileSprite.texture = this.getTileSprite(atlas, this.currentTileType).texture;
-    this.tileAnimatedSprite.texture = this.getTileSprite(atlas, this.props.config.tileType).texture;
-
-    console.log("click")
-    this.initContainerSetup()
+    this.tileSprite.texture = this.getTileSprite(atlas, this.props.config.tileType).texture;
+     
+    // this.tileSprite.texture = this.getTileSprite(atlas, this.currentTileType).texture;
+    // this.tileAnimatedSprite.texture = this.getTileSprite(atlas, this.props.config.tileType).texture;
+  
+    // this.tileTransitionAnimation(2)
+    //console.log("click")
+    //this.initContainerSetup()
   }
   private tileTransitionAnimation(duration: number) { 
     if (this.tileSprite === undefined || this.tileAnimatedSprite === undefined) {
@@ -143,7 +223,6 @@ export class BoardTile {
       } else { 
         this.isAnimating = false
         this.tileSprite.texture = this.tileAnimatedSprite.texture
-        //this.container.removeChildren()
         tile.alpha = 0
         this.ticker.remove(animate)
       }
@@ -181,8 +260,6 @@ export class BoardTile {
           ".png"
       ]
     );
-
-    console.log(tileSprite);
     return tileSprite;
   }
 
@@ -200,13 +277,49 @@ export class BoardTile {
 
   private getAtlasFromTilePosition() {
     const tilePosition = this.props.config.tilePosition;
-    let atlas = "./assets/atlas_tiles_1.json";
+    let atlas = "./assets/atlas_tiles_13.json";
     switch (tilePosition) {
       case 1:
         atlas = "./assets/atlas_tiles_1.json";
         break;
       case 2:
         atlas = "./assets/atlas_tiles_2.json";
+        break;
+      case 3:
+        atlas = "./assets/atlas_tiles_3.json";
+        break;
+      case 4:
+        atlas = "./assets/atlas_tiles_4.json";
+        break;
+      case 5:
+        atlas = "./assets/atlas_tiles_5.json";
+        break;
+      case 6:
+        atlas = "./assets/atlas_tiles_6.json";
+        break;
+      case 7:
+        atlas = "./assets/atlas_tiles_7.json";
+        break;
+      case 8:
+        atlas = "./assets/atlas_tiles_8.json";
+        break;
+      case 9:
+        atlas = "./assets/atlas_tiles_9.json";
+        break;
+      case 10:
+        atlas = "./assets/atlas_tiles_10.json";
+        break;
+      case 11:
+        atlas = "./assets/atlas_tiles_11.json";
+        break;
+      case 12:
+        atlas = "./assets/atlas_tiles_12.json";
+        break;
+      case 13:
+        atlas = "./assets/atlas_tiles_13.json";
+        break;
+      case 14:
+        atlas = "./assets/atlas_tiles_14.json";
         break;
     }
 

@@ -1,95 +1,95 @@
 {
   "frames": {
-    "map_segment_blue_1.png": {
+    "map_segment_blue_3.png": {
       "frame": {
         "x": 0,
         "y": 0,
-        "w": 124,
-        "h": 243
+        "w": 123,
+        "h": 137
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 124,
-        "h": 243
+        "w": 123,
+        "h": 137
       },
       "sourceSize": {
-        "w": 124,
-        "h": 243
+        "w": 123,
+        "h": 137
       },
       "pivot": {
         "x": 0.5,
         "y": 0.5
       }
     },
-    "map_segment_green_1.png": {
+    "map_segment_green_3.png": {
       "frame": {
         "x": 0,
-        "y": 243,
-        "w": 124,
-        "h": 243
+        "y": 137,
+        "w": 123,
+        "h": 137
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 124,
-        "h": 243
+        "w": 123,
+        "h": 137
       },
       "sourceSize": {
-        "w": 124,
-        "h": 243
+        "w": 123,
+        "h": 137
       },
       "pivot": {
         "x": 0.5,
         "y": 0.5
       }
     },
-    "map_segment_grey_1.png": {
+    "map_segment_grey_3.png": {
       "frame": {
         "x": 0,
-        "y": 486,
-        "w": 124,
-        "h": 243
+        "y": 274,
+        "w": 123,
+        "h": 137
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 124,
-        "h": 243
+        "w": 123,
+        "h": 137
       },
       "sourceSize": {
-        "w": 124,
-        "h": 243
+        "w": 123,
+        "h": 137
       },
       "pivot": {
         "x": 0.5,
         "y": 0.5
       }
     },
-    "map_segment_red_1.png": {
+    "map_segment_red_3.png": {
       "frame": {
         "x": 0,
-        "y": 729,
-        "w": 124,
-        "h": 243
+        "y": 411,
+        "w": 123,
+        "h": 137
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 124,
-        "h": 243
+        "w": 123,
+        "h": 137
       },
       "sourceSize": {
-        "w": 124,
-        "h": 243
+        "w": 123,
+        "h": 137
       },
       "pivot": {
         "x": 0.5,
@@ -100,11 +100,11 @@
   "meta": {
     "app": "http://free-tex-packer.com",
     "version": "0.6.7",
-    "image": "atlas_tiles_1.png",
+    "image": "atlas_tiles_3.png",
     "format": "RGBA8888",
     "size": {
-      "w": 124,
-      "h": 972
+      "w": 123,
+      "h": 548
     },
     "scale": 1
   }

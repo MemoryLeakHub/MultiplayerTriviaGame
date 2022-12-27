@@ -1,12 +1,12 @@
 import React, { useRef, useEffect, useState } from "react";
-import { Application, Sprite, Container, State } from "pixi.js";
-import { BoardTile, BoardTileConfig, TileType } from "./BoardTile";
+import { Application, Sprite, Container } from "pixi.js";
+import { BoardTile } from "./BoardTile";
 import { tilesList } from "./Tiles";
-import GameUI from "./GameUI";
 import GameUiLogin from "./GameUILogin";
-import GameUIPlayer, { PlayerLobbyData } from "./GameUIPlayer";
 import GameUILobby from "./GameUILobby";
 import client from '@urturn/client'
+import { Timer } from "easytimer.js";
+
 import "./styles.css"
 function App() {
   const canvasEle = useRef(null);
@@ -19,32 +19,29 @@ function App() {
   const [showLogin, setShowLoign] = useState(false)
   const [showLobby, setShowLobby] = useState(false)
   const [assetsFinishedLoading, setAssetsFInishedLoading] = useState(false)
-  let playeDataList: PlayerLobbyData[] = 
-  [{
-    isMaster: true,
-    isBot: false,
-  }, 
-  {
-    isMaster: false,
-    isBot: true
-  },
-  {
-    isMaster:false,
-    isBot:false
-  }
-  ]
+  const [tilesChose, setTilesChosen] = useState([])
+  const [timer, setTimer] = useState(0)
 
   const {
     state: {
       status = "",
-      playerIdToPlayerState = {}
+      playerIdToPlayerState = {},
+      mapConnectedSections = [],
+      phaseTimerStart = null,
+      phaseTimerTotal = null
     } = {},
     roomStartContext,
     players = [], finished,
   } = roomState;
 
-  const dataLoading = roomState == null || curPlr == null;
-  
+  const pickTilesClick = (event: any) => {
+    setCount(count + 1);
+
+    if (tiles != null) {
+      var currentTile = tiles[1] as BoardTile
+      currentTile.onTileChange(count)
+    }
+  };
   const handleClick = (event: any) => {
     setCount(count + 1);
 
@@ -53,9 +50,45 @@ function App() {
       currentTile.onTileChange(count)
     }
   };
+  useEffect(() => {
+    const setupCurPlr = async () => {
+      const newCurPlr = await client.getLocalPlayer();
+      setCurPlr(newCurPlr);
+    };
+    setupCurPlr();
+  }, []);
+
+  function getTimeLeftSecs(startTime, timeoutMs) {
+    const timeoutDateMs = new Date(startTime).getTime() + timeoutMs;
+    const nowMs = client.now();
+    const timeLeftSecs = (timeoutDateMs - nowMs) / 1000;
+    return timeLeftSecs;
+  }
+
+  useEffect(() => {
+    if (phaseTimerStart != null && phaseTimerTotal != null ) {
+      const intervalId = setInterval(() => {  
+        var left = getTimeLeftSecs(phaseTimerStart, phaseTimerTotal)
+        console.log("left : ", left)
+        console.log("client.now() : ", client.now())
+        if (left <= 0) {
+          client.makeMove({ InGameMoveStatusFront: "PickStartingTileEnd" });
+          clearInterval(intervalId);
+        }
+      }, 1000)
+    
+      return () => clearInterval(intervalId); //This is important
   
+    }
+  }, [phaseTimerStart, phaseTimerTotal ]);
+
+  
+
+
   useEffect(() => {
     const onStateChanged = (newBoardGame) => {
+      console.log("state changed")
+      console.log(newBoardGame)
       setRoomState(newBoardGame);
     };
     client.events.on('stateChanged', onStateChanged);
@@ -65,20 +98,14 @@ function App() {
   }, []);
 
   useEffect(() => {
-    console.log("hereee 1")
     if (!assetsFinishedLoading) {
       return;
     }
-    console.log("hereee 2")
-    
-    if (!dataLoading) {
+    if (roomState == null || curPlr == null) {
       return;
     }
-    console.log("hereee 3")
-
-    const currentPlayer = roomState.playerIdToPlayerState[curPlr.id]
+    const currentPlayer = playerIdToPlayerState[curPlr.id]
     if (status === "PrepGame") {
-      console.log("hereee 4")
       if (currentPlayer.status === "Login")  {
         setShowLoign(true)
       } else if (currentPlayer.status === "Lobby") {
@@ -86,7 +113,17 @@ function App() {
       }
     }
 
-  }, [assetsFinishedLoading, dataLoading, status]);
+    console.log("updated roomState 222 ")
+    console.log(roomState)
+  }, [assetsFinishedLoading, roomState, curPlr]);
+
+  useEffect(() => {
+    if (tiles != null) {
+      tiles.map((currentTile:BoardTile) => {
+        currentTile.updateState(roomState)
+      })
+    }
+  }, [roomState,tiles]);
 
   useEffect(() => {
     // On first render create our application
@@ -96,13 +133,13 @@ function App() {
       height: 720
     });
 
-    const setupCurPlr = async () => {
-      const newCurPlr = await client.getLocalPlayer();
-      setCurPlr(newCurPlr);
+    // const setupCurPlr = async () => {
+    //   const newCurPlr = await client.getLocalPlayer();
+    //   setCurPlr(newCurPlr);
 
-      client.makeMove({ username: "test user" })
-    };
-    setupCurPlr();
+    //   client.makeMove({ username: "test user" })
+    // };
+    // setupCurPlr();
 
     // Start the PixiJS app
     game.start();
@@ -110,11 +147,24 @@ function App() {
       "./assets/map_full.png",
       "./assets/map_walls_plus_separators.png",
       "./assets/atlas_tiles_1.json",
-      "./assets/atlas_tiles_2.json"
+      "./assets/atlas_tiles_2.json",
+      "./assets/atlas_tiles_3.json",
+      "./assets/atlas_tiles_4.json",
+      "./assets/atlas_tiles_5.json",
+      "./assets/atlas_tiles_6.json",
+      "./assets/atlas_tiles_7.json",
+      "./assets/atlas_tiles_8.json",
+      "./assets/atlas_tiles_9.json",
+      "./assets/atlas_tiles_10.json",
+      "./assets/atlas_tiles_11.json",
+      "./assets/atlas_tiles_12.json",
+      "./assets/atlas_tiles_13.json",
+      "./assets/atlas_tiles_14.json",
+      "./assets/x_tile.png"
     ].forEach(r => { game.loader.add(r); });
     game.loader.onProgress.add((loader, resources) => { 
       setPreLoadProgress(loader.progress)
-      if (loader.progress == 100) {
+      if (Math.round(loader.progress) == 100) {
         setAssetsFInishedLoading(true)
       }
     });
@@ -156,23 +206,29 @@ function App() {
     };
   }, []);
 
+  const onLoginClick = username => {
+    client.makeMove({ username: username })
+  }
+  const onStartGameClick = () => {
+   client.makeMove({ startGame: true })
+  }
+
   return (
     <div className="flex h-screen">
       <div className="m-auto">
         <canvas ref={canvasEle} />
-        <div className="w-[1200px] h-[720px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          {(!showLobby) ? // is not logged
-             <GameUiLogin preLoadProgress={preLoadProgress} showLogin={showLogin} /> 
-             : 
-             <GameUILobby playerLobbyData={playeDataList} /> 
-          }
-        </div>
+        { // if we are not in the game show the Login or Lobby
+            (status !== "InGame") ? 
+            <div className="w-[1200px] h-[720px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+              {(!showLobby) ? // is not logged
+                 <GameUiLogin preLoadProgress={preLoadProgress} showLogin={showLogin} onLoginClick={onLoginClick} /> 
+                 : 
+                 <GameUILobby playerIdToPlayerState={playerIdToPlayerState} onStartGameClick={onStartGameClick} /> 
+              }
+            </div>
+            : ""
+        }
       </div>
-      
-    {/* <div>
-      <h1>TODO: Implement your game UI here!</h1>
-      <p >Current Plr: {curPlr?.username}</p>
-    </div> */}
     </div>
   );
 }

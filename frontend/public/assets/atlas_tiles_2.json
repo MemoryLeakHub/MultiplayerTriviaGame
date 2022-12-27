@@ -1,47 +1,23 @@
 {
   "frames": {
-    "map_segment_grey_2.png": {
+    "map_segment_blue_2.png": {
       "frame": {
         "x": 0,
         "y": 0,
-        "w": 142,
-        "h": 182
+        "w": 253,
+        "h": 116
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 142,
-        "h": 182
+        "w": 253,
+        "h": 116
       },
       "sourceSize": {
-        "w": 142,
-        "h": 182
-      },
-      "pivot": {
-        "x": 0.5,
-        "y": 0.5
-      }
-    },
-    "map_segment_blue_2.png": {
-      "frame": {
-        "x": 0,
-        "y": 182,
-        "w": 142,
-        "h": 181
-      },
-      "rotated": false,
-      "trimmed": true,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 142,
-        "h": 181
-      },
-      "sourceSize": {
-        "w": 142,
-        "h": 182
+        "w": 253,
+        "h": 116
       },
       "pivot": {
         "x": 0.5,
@@ -50,22 +26,46 @@
     },
     "map_segment_green_2.png": {
       "frame": {
-        "x": 0,
-        "y": 363,
-        "w": 142,
-        "h": 181
+        "x": 253,
+        "y": 0,
+        "w": 253,
+        "h": 116
       },
       "rotated": false,
-      "trimmed": true,
+      "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 142,
-        "h": 181
+        "w": 253,
+        "h": 116
       },
       "sourceSize": {
-        "w": 142,
-        "h": 182
+        "w": 253,
+        "h": 116
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "map_segment_grey_2.png": {
+      "frame": {
+        "x": 506,
+        "y": 0,
+        "w": 253,
+        "h": 116
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 253,
+        "h": 116
+      },
+      "sourceSize": {
+        "w": 253,
+        "h": 116
       },
       "pivot": {
         "x": 0.5,
@@ -74,22 +74,22 @@
     },
     "map_segment_red_2.png": {
       "frame": {
-        "x": 0,
-        "y": 544,
-        "w": 142,
-        "h": 181
+        "x": 759,
+        "y": 0,
+        "w": 253,
+        "h": 116
       },
       "rotated": false,
-      "trimmed": true,
+      "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 142,
-        "h": 181
+        "w": 253,
+        "h": 116
       },
       "sourceSize": {
-        "w": 142,
-        "h": 182
+        "w": 253,
+        "h": 116
       },
       "pivot": {
         "x": 0.5,
@@ -103,8 +103,8 @@
     "image": "atlas_tiles_2.png",
     "format": "RGBA8888",
     "size": {
-      "w": 142,
-      "h": 725
+      "w": 1012,
+      "h": 116
     },
     "scale": 1
   }
