@@ -1,5 +1,5 @@
 import {
-  getRandomItemFromArray, removeItem, getRandomNElementsFromArray
+  getRandomItemFromArray, removeItem, getRandomNElementsFromArray, randomIntFromInterval
 } from './utils';
 
 const PlayerType = Object.freeze({
@@ -16,6 +16,7 @@ const GamePhase = Object.freeze({
   PickStartingTile: 'PickStartingTile',
   PickEmptyTile: 'PickEmptyTile',
   EmptyTileBattle: 'EmptyTileBattle',
+  ShowEmptyTileBattleAnswers: 'ShowEmptyTileBattleAnswers',
 });
 const PlayerStatus = Object.freeze({
   Login: 'Login',
@@ -32,16 +33,38 @@ const TileStatus = Object.freeze({
 const InGameMoveStatus = Object.freeze({
   PickStartingTileEnd: 'PickStartingTileEnd',
   PickEmptyTileEnd: 'PickEmptyTileEnd',
-  EmptyTileBattleEnd: 'EmptyTileBattleEnd'
+  EmptyTileBattleEnd: 'EmptyTileBattleEnd',
+  ShowEmptyTileBattleAnswersEnd: 'ShowEmptyTileBattleAnswersEnd'
 });
 const PlayerAction = Object.freeze({
-  PickTilePlayerAction: 'PickTilePlayerAction'
+  PickTilePlayerAction: 'PickTilePlayerAction',
+  PickAnswerPlayerAction: 'PickAnswerPlayerAction'
 });
 const CHOOSE_STARTING_POSITION_TIMEOUT = 3000; 
 const CHOOSE_EMPTY_TILE_TIMEOUT = 3000; 
 const BATTLE_EMPTY_TILE_TIMEOUT = 10000; 
+const BATTLE_EMPTY_TILE_SHOW_ANSWERS_TIMEOUT = 5000; 
+
 // playerIdToPlayerState[id] = playerState 
 // -- status -> Status
+const QUESTIONS_PICK = [
+  {
+    text:"What color is the sky",
+    answers: ["Blue","Red","Green","Yellow"],
+    type: 1,
+    correctAnswer: 0,
+    botRange: [],
+  }
+]
+const QUESTIONS_NUMBERS = [
+  {
+    text:"How much is 2*2",
+    answers: [],
+    type: 0,
+    correctAnswer: 4,
+    botRange: [0,10]
+  }
+]
 
 function onRoomStart(roomState) {
   const { logger } = roomState;
@@ -57,8 +80,12 @@ function onRoomStart(roomState) {
       numberOfPlayers: 0,
       phaseTimerStart: {},
       phaseTimerTotal: {},
+      botTimeRange: [2000,BATTLE_EMPTY_TILE_TIMEOUT],
+      botDifficulty: 20,
       playerColors: shuffledColors,
+      answerPlacements: [],
       playerIdToPlayerState: {},
+      question: null,
       mapConnectedSections: [
         {//1
           connected: [2,3],
@@ -136,7 +163,9 @@ function onPlayerJoin(player, roomState) {
       isBot: false,
       isMaster: false,
       madePhaseAction: false,
+      timeAnswered: 0,
       tatalValue: 0,
+      answer:null,
       mapSections: [],
       battleForTile: []
     }
@@ -201,6 +230,7 @@ function onLoginMove(player, move, roomState) {
     mapSections: [],
     battleForTile: [],
     tatalValue: 0,
+    answer:null,
     type: state.playerColors[1],
   }
   state.playerIdToPlayerState["bot_1"].username = "John"
@@ -210,6 +240,7 @@ function onLoginMove(player, move, roomState) {
     isMaster: false,
     mapSections: [],
     battleForTile: [],
+    answer:null,
     tatalValue: 0,
     type: state.playerColors[2]
   }
@@ -280,6 +311,7 @@ function resetPlayerPhaseAction(roomState) {
   const { state, players, logger } = roomState;
   Object.entries(state.playerIdToPlayerState).map(([k, player]) => { 
       player.madePhaseAction = false
+      player.answer = null
   })
 }
 
@@ -302,7 +334,7 @@ function onInGameMove(player, move, roomState) {
   const { state, players, logger } = roomState;
   logger.info('onInGameMovey called with:', { player, move, state })
 
-  const { InGameMoveStatusClient, tile } = move
+  const { InGameMoveStatusClient, data } = move
   // after the 1st ever round of picking a starting tile has ended
   if (InGameMoveStatus.PickStartingTileEnd === InGameMoveStatusClient) {
     pickEmptyTileStage(roomState)
@@ -313,7 +345,7 @@ function onInGameMove(player, move, roomState) {
     && state.gamePhase == GamePhase.PickStartingTile) {
     // picking a tile with player by clicking on it
     const playerState = state.playerIdToPlayerState[player.id]
-    if (!state.emptyMapSections.includes(tile)) { // check if tile is available
+    if (!state.emptyMapSections.includes(data.tile)) { // check if tile is available
       throw new Error("Tile is already picked")
     } 
 
@@ -333,20 +365,37 @@ function onInGameMove(player, move, roomState) {
         throw new Error("You have chosen enough tiles for this round!")
       }
 
-      if (!state.emptyMapSections.includes(tile)) { // check if tile is available
+      if (!state.emptyMapSections.includes(data.tile)) { // check if tile is available
         throw new Error("Choose an empty tile!")
       } 
 
-      state.battleForTile.push(tile)
+      state.battleForTile.push(data.tile)
 
   } else if (InGameMoveStatus.PickEmptyTileEnd === InGameMoveStatusClient) { 
     pickEmptyTileStage(roomState)
     state.gamePhase = GamePhase.EmptyTileBattle
     state.phaseTimerStart = new Date().getTime();
     state.phaseTimerTotal = BATTLE_EMPTY_TILE_TIMEOUT
-  } else if (InGameMoveStatus.EmptyTileBattleEnd === InGameMoveStatusClient) { 
-    // should check for winners and give them the tiles
+    state.question = QUESTIONS_NUMBERS[0]
+    
+  } else if (PlayerAction.PickTilePlayerAction === InGameMoveStatusClient 
+    && state.gamePhase == GamePhase.EmptyTileBattle) { 
+      const playerState = state.playerIdToPlayerState[player.id]
+      if (playerState.answer != null) {
+        throw new Error("You have chosen an asnwer already!")
+      }
 
+      playerState.answer = data.answer
+      playerState.timeAnswered = new Date().getTime()
+  } else if (InGameMoveStatus.EmptyTileBattleEnd === InGameMoveStatusClient) { 
+    // creating bot answers
+    createBotAnswers()
+    // should check for winners and give them the tiles
+    emptyTileCorrectAnswers(roomState)
+    state.gamePhase = GamePhase.ShowEmptyTileBattleAnswers
+    state.phaseTimerStart = new Date().getTime();
+    state.phaseTimerTotal = BATTLE_EMPTY_TILE_SHOW_ANSWERS_TIMEOUT
+  } else if (InGameMoveStatus.ShowEmptyTileBattleAnswersEnd === InGameMoveStatusClient) {
     if (state.emptyMapSections.size == 0) { // end of the empty tile pick battles should go to real battles
       
     } else { // loop until map filled
@@ -360,6 +409,56 @@ function onInGameMove(player, move, roomState) {
   return { state };
 }
 
+function emptyTileCorrectAnswers(roomState) { 
+  const { state, players, logger } = roomState;
+  let playersAnswers = []
+  Object.entries(state.playerIdToPlayerState).map(([playerId, player]) => { 
+   playersAnswers.push({
+    answer: player.answer,
+    timeAnswered: player.timeAnswered,
+    playerId: playerId
+   })
+  })
+
+  const closest = playersAnswers.sort((a, b) => {
+    if (Math.abs(b.answer - correctAnswer) < Math.abs(a.answer - correctAnswer)) {
+        return 1;
+    } else if (Math.abs(b.answer - correctAnswer) > Math.abs(a.answer - correctAnswer)) {
+        return -1;
+    }
+
+    if (b.timeAnswered < a.timeAnswered) {
+      return 1;
+    } else if (b.timeAnswered > a.timeAnswered) {
+      return -1;
+    }
+
+    return 0; // because they are equal in value and should have equal ordering
+  })
+ 
+  state.answerPlacements = [closest[0].playerId, closest[1].playerId, closest[2].playerId]
+}
+
+function createBotAnswers(roomState) { 
+  const { state, players, logger } = roomState;
+  Object.entries(state.playerIdToPlayerState).map(([k, player]) => { 
+    if (player.isBot) {
+      const botTimeRange = randomIntFromInterval(state.botTimeRange[0],state.botTimeRange[1])
+      if (state.question.type == 0) { // number
+        const range = state.question.botRange
+        player.answer = randomIntFromInterval(range[0],range[1])
+        player.timeAnswered = new Date().getTime(); + botTimeRange
+      } else { // pick
+        if (randomIntFromInterval(0,100) < state.botDifficulty ) {
+          player.answer = state.question.answer
+        } else {
+          player.answer = randomIntFromInterval(0,3)
+        }
+        player.timeAnswered = new Date().getTime(); + botTimeRange
+      }
+    } 
+  })
+}
 
 // Export these functions so UrTurn runner can run these functions whenever the associated event
 // is triggered. Follow an example flow of events: https://docs.urturn.app/docs/Introduction/Flow-Of-Simple-Game

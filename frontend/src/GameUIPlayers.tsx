@@ -1,6 +1,6 @@
 import GameUIPlayer from "./GameUIPlayer";
 
-function GameUI({playerIdToPlayerState}) {
+function GameUIPlayers({playerIdToPlayerState}) {
   
   return (
     <div className="w-[200px] h-[220px] absolute top-0 left-0 ">
@@ -16,4 +16,4 @@ function GameUI({playerIdToPlayerState}) {
     </div>
   );
 }
-export default GameUI;
+export default GameUIPlayers;

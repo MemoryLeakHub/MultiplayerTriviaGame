@@ -15,3 +15,7 @@ export const getRandomNElementsFromArray = (array, n) => {
     let selected = shuffled.slice(0, n);
     return selected
 }
+
+export const randomIntFromInterval = (min, max) => { // min and max included 
+  return Math.floor(Math.random() * (max - min + 1) + min)
+}

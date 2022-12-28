@@ -7,8 +7,9 @@ import GameUILobby from "./GameUILobby";
 import client from '@urturn/client'
 import { Timer } from "easytimer.js";
 import { useSnackbar } from 'notistack';
-import GameUI from "./GameUI";
-
+import GameUIPlayers from "./GameUIPlayers";
+import GameUIPhaseProgress from "./GameUIPhaseProgress"
+import GameUIQuestion from "./GameUIQuestion"
 import "./styles.css"
 function App() {
   const canvasEle = useRef(null);
@@ -26,6 +27,7 @@ function App() {
   const [currentGameState, setCurrentGameState] = useState(0)
   const { enqueueSnackbar } = useSnackbar();
 
+  const [timeLeft, setTimeLeft] = useState(0)
   const {
     state: {
       status = "",
@@ -42,7 +44,7 @@ function App() {
   const onTileClick = (tile: number) => {
     console.log("onTileClick: ", tile)
     // if (roomState.state.gamePhase == "PickStartingTile") {
-      client.makeMove({ InGameMoveStatusClient: "PickTilePlayerAction", tile: tile }).then(({ error }) => {
+      client.makeMove({ InGameMoveStatusClient: "PickTilePlayerAction", data: {tile:tile} }).then(({ error }) => {
         if (error != null) {
           throw new Error(error.message);
         }
@@ -72,12 +74,16 @@ function App() {
 
   useEffect(() => {
     if (phaseTimerStart != null && phaseTimerTotal != null ) {
+      
+      var timeLeft = Math.round(getTimeLeftSecs(phaseTimerStart, phaseTimerTotal))
+      setTimeLeft(timeLeft)
       const intervalId = setInterval(() => {  
-        var left = getTimeLeftSecs(phaseTimerStart, phaseTimerTotal)
+        var left = Math.round(getTimeLeftSecs(phaseTimerStart, phaseTimerTotal))
+     
         console.log("time : " + left);
         if (left <= 0) {
           if (gamePhase == "PickStartingTile") {
-            client.makeMove({ InGameMoveStatusClient: "PickStartingTileEnd", tile: -1 }).then(({ error }) => {
+            client.makeMove({ InGameMoveStatusClient: "PickStartingTileEnd", data: {tile: -1} }).then(({ error }) => {
               if (error != null) {
                 throw new Error(error.message);
               }
@@ -87,6 +93,8 @@ function App() {
                 autoHideDuration: 3000,
               });
             });
+          } else if (gamePhase == "PickEmptyTile") {
+
           }
           clearInterval(intervalId);
         }
@@ -250,8 +258,7 @@ function App() {
     });
   });
   }
-
-  console.log(status)
+  
   return (
     <div className="flex m-auto w-[1200px] h-[720px]  absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
       <div className="m-auto absolute">
@@ -265,7 +272,15 @@ function App() {
                  <GameUILobby playerIdToPlayerState={playerIdToPlayerState} onStartGameClick={onStartGameClick} /> 
               }
             </div>
-            : (status == "InGame") ? <GameUI playerIdToPlayerState={playerIdToPlayerState} /> :  ""
+            : (status == "InGame") ? 
+              <div>
+                <GameUIPlayers playerIdToPlayerState={playerIdToPlayerState} />
+
+                <GameUIPhaseProgress timeLeft={timeLeft} phase={gamePhase}/>
+                <GameUIQuestion />
+              </div>
+              
+            :  ""
         }
       </div>
     </div>
