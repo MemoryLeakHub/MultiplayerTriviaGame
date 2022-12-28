@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import GameUIPlayer from "./GameUIPlayer";
+import GameUILobbyPlayer from "./GameUILobbyPlayer";
 
 function GameUILobby({playerIdToPlayerState, onStartGameClick}: {playerIdToPlayerState, onStartGameClick: any}) {
 
@@ -11,7 +11,7 @@ function GameUILobby({playerIdToPlayerState, onStartGameClick}: {playerIdToPlaye
             
             Object.entries(playerIdToPlayerState).map(([k, player]) => { 
               return (
-                <GameUIPlayer player={player}/>
+                <GameUILobbyPlayer player={player}/>
               );
             })
           }

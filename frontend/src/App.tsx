@@ -6,12 +6,14 @@ import GameUiLogin from "./GameUILogin";
 import GameUILobby from "./GameUILobby";
 import client from '@urturn/client'
 import { Timer } from "easytimer.js";
+import { useSnackbar } from 'notistack';
+import GameUI from "./GameUI";
 
 import "./styles.css"
 function App() {
   const canvasEle = useRef(null);
   const [roomState, setRoomState] = useState(client.getRoomState() || {});
-  const [curPlr, setCurPlr] = useState();
+  const [curPlr, setCurPlr] = useState(null);
   const [count, setCount] = useState(0);
   const [tiles, setTiles] = useState(null);
   const [preLoadProgress, setPreLoadProgress] = useState(0);
@@ -21,6 +23,8 @@ function App() {
   const [assetsFinishedLoading, setAssetsFInishedLoading] = useState(false)
   const [tilesChose, setTilesChosen] = useState([])
   const [timer, setTimer] = useState(0)
+  const [currentGameState, setCurrentGameState] = useState(0)
+  const { enqueueSnackbar } = useSnackbar();
 
   const {
     state: {
@@ -35,22 +39,22 @@ function App() {
     players = [], finished,
   } = roomState;
 
-  const pickTilesClick = (event: any) => {
-    setCount(count + 1);
-
-    if (tiles != null) {
-      var currentTile = tiles[1] as BoardTile
-      currentTile.onTileChange(count)
-    }
+  const onTileClick = (tile: number) => {
+    console.log("onTileClick: ", tile)
+    // if (roomState.state.gamePhase == "PickStartingTile") {
+      client.makeMove({ InGameMoveStatusClient: "PickTilePlayerAction", tile: tile }).then(({ error }) => {
+        if (error != null) {
+          throw new Error(error.message);
+        }
+      }).catch((error) => {
+        enqueueSnackbar(error.message, {
+          variant: 'error',
+          autoHideDuration: 3000,
+        });
+      });
+    // }
   };
-  const handleClick = (event: any) => {
-    setCount(count + 1);
 
-    if (tiles != null) {
-      var currentTile = tiles[1] as BoardTile
-      currentTile.onTileChange(count)
-    }
-  };
   useEffect(() => {
     const setupCurPlr = async () => {
       const newCurPlr = await client.getLocalPlayer();
@@ -70,10 +74,20 @@ function App() {
     if (phaseTimerStart != null && phaseTimerTotal != null ) {
       const intervalId = setInterval(() => {  
         var left = getTimeLeftSecs(phaseTimerStart, phaseTimerTotal)
-        console.log("left : ", left)
-        console.log("client.now() : ", client.now())
+        console.log("time : " + left);
         if (left <= 0) {
-          client.makeMove({ InGameMoveStatusFront: "PickStartingTileEnd" });
+          if (gamePhase == "PickStartingTile") {
+            client.makeMove({ InGameMoveStatusClient: "PickStartingTileEnd", tile: -1 }).then(({ error }) => {
+              if (error != null) {
+                throw new Error(error.message);
+              }
+            }).catch((error) => {
+              enqueueSnackbar(error.message, {
+                variant: 'error',
+                autoHideDuration: 3000,
+              });
+            });
+          }
           clearInterval(intervalId);
         }
       }, 1000)
@@ -81,7 +95,7 @@ function App() {
       return () => clearInterval(intervalId); //This is important
   
     }
-  }, [phaseTimerStart, phaseTimerTotal ]);
+  }, [phaseTimerStart, phaseTimerTotal, gamePhase ]);
 
   
   useEffect(() => {
@@ -187,6 +201,7 @@ function App() {
           const boardTilesContainer = new Container();
 
           const tiles = tilesList({
+            onTileClick: onTileClick,
             resources: resources,
             boardContainer: boardContainer,
             boardTilesContainer: boardTilesContainer
@@ -212,15 +227,34 @@ function App() {
   }, []);
 
   const onLoginClick = username => {
-    client.makeMove({ username: username })
+    client.makeMove({ username: username }).then(({ error }) => {
+      if (error != null) {
+        throw new Error(error.message);
+      }
+    }).catch((error) => {
+      enqueueSnackbar(error.message, {
+        variant: 'error',
+        autoHideDuration: 3000,
+      });
+    });
   }
   const onStartGameClick = () => {
-   client.makeMove({ startGame: true })
+   client.makeMove({ startGame: true }).then(({ error }) => {
+    if (error != null) {
+      throw new Error(error.message);
+    }
+  }).catch((error) => {
+    enqueueSnackbar(error.message, {
+      variant: 'error',
+      autoHideDuration: 3000,
+    });
+  });
   }
 
+  console.log(status)
   return (
-    <div className="flex h-screen">
-      <div className="m-auto">
+    <div className="flex m-auto w-[1200px] h-[720px]  absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+      <div className="m-auto absolute">
         <canvas ref={canvasEle} />
         { // if we are not in the game show the Login or Lobby
             (status !== "InGame") ? 
@@ -231,7 +265,7 @@ function App() {
                  <GameUILobby playerIdToPlayerState={playerIdToPlayerState} onStartGameClick={onStartGameClick} /> 
               }
             </div>
-            : ""
+            : (status == "InGame") ? <GameUI playerIdToPlayerState={playerIdToPlayerState} /> :  ""
         }
       </div>
     </div>

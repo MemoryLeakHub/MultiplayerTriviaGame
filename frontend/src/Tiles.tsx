@@ -4,6 +4,7 @@ export const tilesList: any = (config: any) => {
   return [
     // Tile 1
     new BoardTile({
+      onTileClick: config.onTileClick,
       config: {
         xInner: -1,
         yInner: -1,
@@ -18,6 +19,7 @@ export const tilesList: any = (config: any) => {
     }),
     // Tile 2
     new BoardTile({
+      onTileClick: config.onTileClick,
       config: {
         xInner: 190,
         yInner: -1,
@@ -32,6 +34,7 @@ export const tilesList: any = (config: any) => {
     }),
     // Tile 3
     new BoardTile({
+      onTileClick: config.onTileClick,
       config: {
         xInner: -1,
         yInner: -1,
@@ -46,6 +49,7 @@ export const tilesList: any = (config: any) => {
     }),
     // Tile 4
     new BoardTile({
+      onTileClick: config.onTileClick,
       config: {
         xInner: -1,
         yInner: -1,
@@ -60,6 +64,7 @@ export const tilesList: any = (config: any) => {
     }),
     // Tile 5
     new BoardTile({
+      onTileClick: config.onTileClick,
       config: {
         xInner: -1,
         yInner: -1,
@@ -74,6 +79,7 @@ export const tilesList: any = (config: any) => {
     }),
     // Tile 6
     new BoardTile({
+      onTileClick: config.onTileClick,
       config: {
         xInner: -1,
         yInner: -1,
@@ -88,6 +94,7 @@ export const tilesList: any = (config: any) => {
     }),
     // Tile 7
     new BoardTile({
+      onTileClick: config.onTileClick,
       config: {
         xInner: -1,
         yInner: -1,
@@ -102,6 +109,7 @@ export const tilesList: any = (config: any) => {
     }),
     // Tile 8
     new BoardTile({
+      onTileClick: config.onTileClick,
       config: {
         xInner: -1,
         yInner: -1,
@@ -116,6 +124,7 @@ export const tilesList: any = (config: any) => {
     }),
     // Tile 9
     new BoardTile({
+      onTileClick: config.onTileClick,
       config: {
         xInner: -1,
         yInner: 30,
@@ -130,6 +139,7 @@ export const tilesList: any = (config: any) => {
     }),
     // Tile 10
     new BoardTile({
+      onTileClick: config.onTileClick,
       config: {
         xInner: -1,
         yInner: -1,
@@ -144,6 +154,7 @@ export const tilesList: any = (config: any) => {
     }),
     // Tile 11
     new BoardTile({
+      onTileClick: config.onTileClick,
       config: {
         xInner: -1,
         yInner: 200,
@@ -158,6 +169,7 @@ export const tilesList: any = (config: any) => {
     }),
     // Tile 12
     new BoardTile({
+      onTileClick: config.onTileClick,
       config: {
         xInner: -1,
         yInner: -1,
@@ -172,6 +184,7 @@ export const tilesList: any = (config: any) => {
     }),
     // Tile 13
     new BoardTile({
+      onTileClick: config.onTileClick,
       config: {
         xInner: -1,
         yInner: -1,
@@ -186,6 +199,7 @@ export const tilesList: any = (config: any) => {
     }),
     // Tile 14
     new BoardTile({
+      onTileClick: config.onTileClick,
       config: {
         xInner: -1,
         yInner: -1,

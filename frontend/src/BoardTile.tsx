@@ -1,5 +1,6 @@
 import { Container, Sprite, Graphics, BLEND_MODES, filters, Ticker, TextStyle, Text, uniformParsers } from "pixi.js";
 
+import client from '@urturn/client'
 export enum TileType {
   PLAYER_RED,
   PLAYER_BLUE,
@@ -70,6 +71,7 @@ export class BoardTile {
   roomStateLocal: any
   constructor(
     public props: {
+      onTileClick: ((tile: number) => void),
       config: BoardTileConfig;
       boardContainer: Container;
       boardTilesContainer: Container;
@@ -91,7 +93,7 @@ export class BoardTile {
 
     props.boardTilesContainer.addChild(this.container);
     this.container.on('pointerdown', (e: any) => {
-      this.onTileClick(atlas);
+      this.onTileClick();
     });
 
     // x mark
@@ -203,24 +205,35 @@ export class BoardTile {
     this.roomStateLocal = roomState
     this.updateWorthText(roomState)
 
+    this.updateTileOwner(roomState)
     this.updateBattlePeon(roomState)
-   
   }
 
+  private updateTileOwner(roomState) {
+
+    const atlas = this.getAtlasFromTilePosition();
+    const players = roomState.state.playerIdToPlayerState as Map<string, Player>
+    Object.values(players).forEach(player => {
+      const playerHasTileInBattle = player.mapSections.includes( this.props.config.tilePosition)
+      
+      if (player.mapSections.length != 0 && playerHasTileInBattle ) {
+        this.props.config.tileType = player.type
+        this.tileSprite.texture = this.getTileSprite(atlas, this.props.config.tileType).texture;
+      } 
+    });
+     
+  }
   private updateBattlePeon(roomState) {
     // reset peons
     this.bluePeon.alpha = 0
     this.redPeon.alpha = 0
     this.greenPeon.alpha = 0
 
-    console.log(roomState.state.playerIdToPlayerState)
+    //console.log(roomState.state.playerIdToPlayerState)
   
     const players = roomState.state.playerIdToPlayerState as Map<string, Player>
     Object.values(players).forEach(player => {
       const playerHasTileInBattle = player.battleForTile.includes( this.props.config.tilePosition)
-      console.log("playerHasTileInBattle : ", playerHasTileInBattle)
-      console.log("this.props.config.tilePosition : ", this.props.config.tilePosition)
-      console.log("player.battleForTile : ",player.battleForTile)
       if (player.battleForTile.length != 0 && playerHasTileInBattle ) {
         if (player.type == TileType.PLAYER_BLUE) {
           this.bluePeon.alpha = 1
@@ -248,14 +261,18 @@ export class BoardTile {
   onTileChange(count: number) {
     //console.log("current Number : " + count + " texture : " + this.tileSprite.texture.textureCacheIds)
   }
-  private onTileClick(atlas: any) { 
-    console.log(this.container.children)
-    if (this.isAnimating) {
-      return;
-    }
-    this.props.config.tileType = (this.props.config.tileType == TileType.PLAYER_BLUE) ? TileType.PLAYER_RED : TileType.PLAYER_BLUE
+  private onTileClick() { 
+    this.props.onTileClick(this.props.config.tilePosition)
+    //client.makeMove({ InGameMoveStatusClient: "PickTilePlayerAction", tile: this.props.config.tilePosition });
+    // console.log(this.container.children)
+    // if (this.isAnimating) {
+    //   return;
+    // }
+    
 
-    this.tileSprite.texture = this.getTileSprite(atlas, this.props.config.tileType).texture;
+   // this.props.config.tileType = (this.props.config.tileType == TileType.PLAYER_BLUE) ? TileType.PLAYER_RED : TileType.PLAYER_BLUE
+
+   // this.tileSprite.texture = this.getTileSprite(atlas, this.props.config.tileType).texture;
      
     // this.tileSprite.texture = this.getTileSprite(atlas, this.currentTileType).texture;
     // this.tileAnimatedSprite.texture = this.getTileSprite(atlas, this.props.config.tileType).texture;
