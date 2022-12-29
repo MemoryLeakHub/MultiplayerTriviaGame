@@ -15,16 +15,12 @@ function App() {
   const canvasEle = useRef(null);
   const [roomState, setRoomState] = useState(client.getRoomState() || {});
   const [curPlr, setCurPlr] = useState(null);
-  const [count, setCount] = useState(0);
   const [tiles, setTiles] = useState(null);
   const [preLoadProgress, setPreLoadProgress] = useState(0);
-  const [isLogged, setIsLogged] = useState(false)
   const [showLogin, setShowLoign] = useState(false)
   const [showLobby, setShowLobby] = useState(false)
   const [assetsFinishedLoading, setAssetsFInishedLoading] = useState(false)
-  const [tilesChose, setTilesChosen] = useState([])
-  const [timer, setTimer] = useState(0)
-  const [currentGameState, setCurrentGameState] = useState(0)
+
   const { enqueueSnackbar } = useSnackbar();
 
   const [timeLeft, setTimeLeft] = useState(0)
@@ -33,6 +29,7 @@ function App() {
       status = "",
       gamePhase = "",
       playerIdToPlayerState = {},
+      question = {},
       mapConnectedSections = [],
       phaseTimerStart = null,
       phaseTimerTotal = null
@@ -94,8 +91,41 @@ function App() {
               });
             });
           } else if (gamePhase == "PickEmptyTile") {
-
+            client.makeMove({ InGameMoveStatusClient: "PickEmptyTileEnd" }).then(({ error }) => {
+              if (error != null) {
+                throw new Error(error.message);
+              }
+            }).catch((error) => {
+              enqueueSnackbar(error.message, {
+                variant: 'error',
+                autoHideDuration: 3000,
+              });
+            });
+          } else if (gamePhase == "EmptyTileBattle") {
+            client.makeMove({ InGameMoveStatusClient: "EmptyTileBattleEnd" }).then(({ error }) => {
+              if (error != null) {
+                throw new Error(error.message);
+              }
+            }).catch((error) => {
+              enqueueSnackbar(error.message, {
+                variant: 'error',
+                autoHideDuration: 3000,
+              });
+            });
+          } else if (gamePhase == "ShowEmptyTileBattleAnswers") {
+            client.makeMove({ InGameMoveStatusClient: "ShowEmptyTileBattleAnswersEnd" }).then(({ error }) => {
+              if (error != null) {
+                throw new Error(error.message);
+              }
+            }).catch((error) => {
+              enqueueSnackbar(error.message, {
+                variant: 'error',
+                autoHideDuration: 3000,
+              });
+            });
           }
+
+          
           clearInterval(intervalId);
         }
       }, 1000)
@@ -144,6 +174,7 @@ function App() {
   }, [assetsFinishedLoading, status, gamePhase, curPlr, playerIdToPlayerState]);
 
   useEffect(() => {
+    console.log("gamePhase tiles : " + gamePhase)
     if (tiles != null) {
       tiles.map((currentTile:BoardTile) => {
         currentTile.updateState(roomState)
@@ -234,6 +265,18 @@ function App() {
     };
   }, []);
 
+  const onAnswerClick = answer  => {
+    client.makeMove({ InGameMoveStatusClient: "PickAnswerPlayerAction", data: {answer:answer} }).then(({ error }) => {
+      if (error != null) {
+        throw new Error(error.message);
+      }
+    }).catch((error) => {
+      enqueueSnackbar(error.message, {
+        variant: 'error',
+        autoHideDuration: 3000,
+      });
+    });
+  }
   const onLoginClick = username => {
     client.makeMove({ username: username }).then(({ error }) => {
       if (error != null) {
@@ -277,7 +320,12 @@ function App() {
                 <GameUIPlayers playerIdToPlayerState={playerIdToPlayerState} />
 
                 <GameUIPhaseProgress timeLeft={timeLeft} phase={gamePhase}/>
-                <GameUIQuestion />
+                {
+                  (gamePhase == "EmptyTileBattle" || gamePhase == "ShowEmptyTileBattleAnswers") ? 
+                  <GameUIQuestion state={roomState.state} curPlayer={curPlr} onAnswer={onAnswerClick} />
+                  : ""
+                }
+                
               </div>
               
             :  ""

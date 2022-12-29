@@ -42,8 +42,8 @@ const PlayerAction = Object.freeze({
 });
 const CHOOSE_STARTING_POSITION_TIMEOUT = 3000; 
 const CHOOSE_EMPTY_TILE_TIMEOUT = 3000; 
-const BATTLE_EMPTY_TILE_TIMEOUT = 10000; 
-const BATTLE_EMPTY_TILE_SHOW_ANSWERS_TIMEOUT = 5000; 
+const BATTLE_EMPTY_TILE_TIMEOUT = 3000; 
+const BATTLE_EMPTY_TILE_SHOW_ANSWERS_TIMEOUT = 3000; 
 
 // playerIdToPlayerState[id] = playerState 
 // -- status -> Status
@@ -68,92 +68,116 @@ const QUESTIONS_NUMBERS = [
 
 function onRoomStart(roomState) {
   const { logger } = roomState;
-  logger.info('Start called')
+ // logger.info('Start called')
   logger.warn('TODO: implement what the state of the room looks like initially')
 
   const colors = [PlayerType.BLUE, PlayerType.RED, PlayerType.GREEN]
   const shuffledColors = colors.sort((a, b) => 0.5 - Math.random());
-  return {
-    state: {
-      status: GameStatus.PrepGame,
-      gamePhase: GamePhase.PickStartingTile,
-      numberOfPlayers: 0,
-      phaseTimerStart: {},
-      phaseTimerTotal: {},
-      botTimeRange: [2000,BATTLE_EMPTY_TILE_TIMEOUT],
-      botDifficulty: 20,
-      playerColors: shuffledColors,
-      answerPlacements: [],
-      playerIdToPlayerState: {},
-      question: null,
-      mapConnectedSections: [
-        {//1
-          connected: [2,3],
-          status: TileStatus.Empty
-        },
-        {//2
-          connected: [1,3,4,5],
-          status: TileStatus.Empty
-        },
-        {//3
-          connected: [1,2,4],
-          status: TileStatus.Empty
-        },
-        {//4
-          connected: [2,3,5,6],
-          status: TileStatus.Empty
-        },
-        {//5
-          connected: [2,4,6,7,8,9],
-          status: TileStatus.Empty
-        },
-        {//6
-          connected: [4,5,7],
-          status: TileStatus.Empty
-        },
-        {//7
-          connected: [5,6,8,11,12],
-          status: TileStatus.Empty
-        },
-        {//8
-          connected: [5,7,9,10,11],
-          status: TileStatus.Empty
-        },
-        {//9
-          connected: [5,8,10,13],
-          status: TileStatus.Empty
-        },
-        {//10
-          connected: [8,9,11,13,14],
-          status: TileStatus.Empty
-        },
-        {//11
-          connected: [7,8,10,12,14],
-          status: TileStatus.Empty
-        },
-        {//12
-          connected: [7,11],
-          status: TileStatus.Empty
-        },
-        {//13
-          connected: [9,14],
-          status: TileStatus.Empty
-        },
-        {//14
-          connected: [10,11,13],
-          status: TileStatus.Empty
-        },
-      ],
-       emptyMapSections: [1,2,3,4,5,6,7,8,9,10,11,12,13,14],
 
-    }
+  
+  
+  let state =  {
+    status: GameStatus.PrepGame,
+    gamePhase: GamePhase.PickStartingTile,
+    numberOfPlayers: 0,
+    phaseTimerStart: {},
+    phaseTimerTotal: {},
+    botTimeRange: [2000,BATTLE_EMPTY_TILE_TIMEOUT],
+    botDifficulty: 20,
+    playerColors: shuffledColors,
+    answerPlacements: [],
+    playerIdToPlayerState: {},
+    question: null,
+    mapConnectedSections: [
+      {//1
+        connected: [2,3],
+        status: TileStatus.Empty
+      },
+      {//2
+        connected: [1,3,4,5],
+        status: TileStatus.Empty
+      },
+      {//3
+        connected: [1,2,4],
+        status: TileStatus.Empty
+      },
+      {//4
+        connected: [2,3,5,6],
+        status: TileStatus.Empty
+      },
+      {//5
+        connected: [2,4,6,7,8,9],
+        status: TileStatus.Empty
+      },
+      {//6
+        connected: [4,5,7],
+        status: TileStatus.Empty
+      },
+      {//7
+        connected: [5,6,8,11,12],
+        status: TileStatus.Empty
+      },
+      {//8
+        connected: [5,7,9,10,11],
+        status: TileStatus.Empty
+      },
+      {//9
+        connected: [5,8,10,13],
+        status: TileStatus.Empty
+      },
+      {//10
+        connected: [8,9,11,13,14],
+        status: TileStatus.Empty
+      },
+      {//11
+        connected: [7,8,10,12,14],
+        status: TileStatus.Empty
+      },
+      {//12
+        connected: [7,11],
+        status: TileStatus.Empty
+      },
+      {//13
+        connected: [9,14],
+        status: TileStatus.Empty
+      },
+      {//14
+        connected: [10,11,13],
+        status: TileStatus.Empty
+      },
+    ],
+     emptyMapSections: [1,2,3,4,5,6,7,8,9,10,11,12,13,14],
+
   }
+  state.playerIdToPlayerState["bot_1"] = {
+    status: PlayerStatus.Lobby,
+    isBot: true,
+    isMaster: false,
+    mapSections: [],
+    battleForTile: [],
+    tatalValue: 0,
+    answer:null,
+    type: state.playerColors[1],
+  }
+  state.playerIdToPlayerState["bot_1"].username = "John"
+
+  state.playerIdToPlayerState["bot_2"] = {
+    status: PlayerStatus.Lobby,
+    isBot: true,
+    isMaster: false,
+    mapSections: [],
+    battleForTile: [],
+    answer:null,
+    tatalValue: 0,
+    type: state.playerColors[2]
+  }
+  state.playerIdToPlayerState["bot_2"].username = "Tom"
+  return { state }
 }
 // 0 - red,1 - blue,2 - green
 function onPlayerJoin(player, roomState) {
   const { state, logger } = roomState
-  logger.info('Join called with:', { player, state })
-  logger.warn('TODO: implement how to change the roomState when a player joins')
+  //logger.warn('TODO: implement how to change the roomState when a player joins')
 
   const playerState = state.playerIdToPlayerState[player.id]
   if (playerState === undefined) {
@@ -161,7 +185,7 @@ function onPlayerJoin(player, roomState) {
       status: PlayerStatus.Login,
       type: state.playerColors[state.numberOfPlayers],
       isBot: false,
-      isMaster: false,
+      isMaster: (state.numberOfPlayers == 0),
       madePhaseAction: false,
       timeAnswered: 0,
       tatalValue: 0,
@@ -173,31 +197,29 @@ function onPlayerJoin(player, roomState) {
   }
   
   if (state.numberOfPlayers == 2) {
-    state.playerIdToPlayerState.delete("bot_1")
+    delete state.playerIdToPlayerState["bot_1"]
   } else if (state.numberOfPlayers == 3) { 
-    state.playerIdToPlayerState.delete("bot_2")
+    delete state.playerIdToPlayerState["bot_2"]
   }
-  logger.warn('TODO: 2222')
+ // logger.warn('TODO: 2222')
 
   return { state }
 }
 
 function onPlayerQuit(player, roomState) {
   const { logger } = roomState
-  logger.info('Quit called with:', { player, roomState })
-  logger.warn('TODO: implement how to change the roomState when a player quits the room')
+  //logger.warn('TODO: implement how to change the roomState when a player quits the room')
   return {}
 }
 
 function onPlayerMove(player, move, roomState) {
   const { state, logger } = roomState;
-  logger.info('Move called with:', { player, move, state })
-  logger.warn('TODO: implement how to change the roomState when any player makes a move')
+  //logger.warn('TODO: implement how to change the roomState when any player makes a move')
 
   const status = state.status;
   const playerState = state.playerIdToPlayerState[player.id]
 
-  logger.warn('1111')
+  //logger.warn('1111')
   switch (status) {
     case GameStatus.PrepGame:
       if (playerState.status === PlayerStatus.Login) {
@@ -206,7 +228,6 @@ function onPlayerMove(player, move, roomState) {
         return onLobbyMove(player, move, roomState);
       }
     case GameStatus.InGame:
-      logger.warn('2222')
       return onInGameMove(player, move, roomState);
     default:
       throw new Error("Game got corrupted, with invalid 'roomState.state.status'. This should never happen, so contact developers.");
@@ -221,64 +242,47 @@ function onLoginMove(player, move, roomState) {
   const playerState = state.playerIdToPlayerState[player.id]
   playerState.status = PlayerStatus.Lobby
   playerState.username = username
-  playerState.isMaster = true
 
-  state.playerIdToPlayerState["bot_1"] = {
-    status: PlayerStatus.Lobby,
-    isBot: true,
-    isMaster: false,
-    mapSections: [],
-    battleForTile: [],
-    tatalValue: 0,
-    answer:null,
-    type: state.playerColors[1],
-  }
-  state.playerIdToPlayerState["bot_1"].username = "John"
-  state.playerIdToPlayerState["bot_2"] = {
-    status: PlayerStatus.Lobby,
-    isBot: true,
-    isMaster: false,
-    mapSections: [],
-    battleForTile: [],
-    answer:null,
-    tatalValue: 0,
-    type: state.playerColors[2]
-  }
-  state.playerIdToPlayerState["bot_2"].username = "Tom"
-
-  logger.warn('TODO: 444')
+ // logger.warn('TODO: 444')
   return { state };
+}
+
+function isPlayerMaster(roomState, player) { 
+  const { state, players, logger } = roomState;
+
+  return state.playerIdToPlayerState[player.id].isMaster
 }
 function onLobbyMove(player, move, roomState) {
   const { state, players, logger } = roomState;
 
+  if (!isPlayerMaster(roomState, player)) {
+    return {state}
+  }
+  
   if (move) {
     players.map((player) => { 
       player.status = PlayerStatus.InGame
     })
-    
+    logger.info('onLobbyMove:')
     state.status = GameStatus.InGame
     state.gamePhase = GamePhase.PickStartingTile
     state.phaseTimerStart = new Date().getTime();
     state.phaseTimerTotal = CHOOSE_STARTING_POSITION_TIMEOUT
-    
-    logger.warn("state.emptyMapSections 1: ", state.emptyMapSections)
     chooseTileAndRemove(state, state.playerIdToPlayerState["bot_1"])
-    logger.warn("state.emptyMapSections 2: ", state.emptyMapSections)
     chooseTileAndRemove(state, state.playerIdToPlayerState["bot_2"])
-    logger.warn("state.emptyMapSections 3: ", state.emptyMapSections)
  
   }
   
   return { state };
 }
-function updatePlayerTotalValue(entity) { 
+function updatePlayerTotalValue(entity, state) { 
   let totalValue = 0
   entity.mapSections.forEach( (element) => {
     let value = 200
-    if (element.status == TileStatus.ReTaken) {
-      value = 300
-    }
+    // const section = state.mapConnectedSections[element-1]
+    // if (section.status == TileStatus.ReTaken) {
+    //   value = 300
+    // }
     totalValue += value
   });
   entity.totalValue = totalValue
@@ -288,19 +292,27 @@ function chooseTileAndRemove(state, entity) {
   if (entity !== undefined) {
     var randomAvailableTile = getRandomItemFromArray(state.emptyMapSections)
 
-    state.emptyMapSections = removeItem(state.emptyMapSections, state.emptyMapSections[randomAvailableTile])
+    state.emptyMapSections = removeItem(state.emptyMapSections, randomAvailableTile)
     entity.mapSections.push(randomAvailableTile)
-    updatePlayerTotalValue(entity)
+    updatePlayerTotalValue(entity, state)
   }
 }
-function chooseTileWithBotEmpty(state, bot) { 
+function chooseTileWithPlayer(roomState, player) { 
+  const { state, players, logger } = roomState;
+
+  
+  var randomElements = getRandomNElementsFromArray(state.emptyMapSections, 2 - player.battleForTile.length)
+  player.battleForTile = randomElements
+}
+function chooseTileWithBot(roomState, bot) { 
+  const { state, players, logger } = roomState;
   var randomElements = getRandomNElementsFromArray(state.emptyMapSections, 2)
   bot.battleForTile = randomElements
 }
 function checkIfAllPlayersHaveSelectedTiles(roomState) { 
   const { state, players, logger } = roomState;
   Object.entries(state.playerIdToPlayerState).map(([k, player]) => { 
-    console.log(player)
+ 
     if (!player.madePhaseAction && !player.isBot) {
       chooseTileAndRemove(state, player)
       player.madePhaseAction = true
@@ -314,33 +326,65 @@ function resetPlayerPhaseAction(roomState) {
       player.answer = null
   })
 }
-
-function pickEmptyTileStage(roomState) { 
+function updateAllPlayersTotalValues(roomState) {
+  const { state, players, logger } = roomState;
+  Object.entries(state.playerIdToPlayerState).map(([k, player]) => { 
+    updatePlayerTotalValue(player, state)
+  })
+}
+function pickEmptyTileStageStart(roomState) { 
   const { state, players, logger } = roomState;
   checkIfAllPlayersHaveSelectedTiles(roomState)
 
   resetPlayerPhaseAction(roomState)
   const bot_1 = state.playerIdToPlayerState["bot_1"]
-  if (bot_1 === undefined) {
-      chooseTileWithBotEmpty(state, bot_1)
+  if (bot_1 !== undefined) {
+    chooseTileWithBot(roomState, bot_1)
   }
   const bot_2 = state.playerIdToPlayerState["bot_2"]
-  if (bot_2 === undefined) {
-      chooseTileWithBotEmpty(state, bot_2)
+  if (bot_2 !== undefined) {
+    chooseTileWithBot(roomState, bot_2)
+  }
+}
+function pickEmptyTileStage(roomState) { 
+  const { state, players, logger } = roomState;
+  
+  Object.entries(state.playerIdToPlayerState).map(([k, player]) => { 
+    if (player.battleForTile.size < 2 && !player.isBot) {
+      chooseTileWithPlayer(state, player)
+      player.madePhaseAction = true
+    } 
+  })
+  
+  resetPlayerPhaseAction(roomState)
+  const bot_1 = state.playerIdToPlayerState["bot_1"]
+  if (bot_1 !== undefined) {
+    chooseTileWithBot(roomState, bot_1)
+  }
+  const bot_2 = state.playerIdToPlayerState["bot_2"]
+  if (bot_2 !== undefined) {
+    chooseTileWithBot(roomState, bot_2)
   }
 }
 
 function onInGameMove(player, move, roomState) {
   const { state, players, logger } = roomState;
-  logger.info('onInGameMovey called with:', { player, move, state })
+  //logger.info('onInGameMovey called with:', { player, move, state })
 
   const { InGameMoveStatusClient, data } = move
   // after the 1st ever round of picking a starting tile has ended
   if (InGameMoveStatus.PickStartingTileEnd === InGameMoveStatusClient) {
-    pickEmptyTileStage(roomState)
+    if (!isPlayerMaster(roomState, player)) {
+      return {state}
+    }
+
+    //logger.info('PickStartingTileEnd ')
+    pickEmptyTileStageStart(roomState)
+    logger.info("state : ", state.playerIdToPlayerState)
     state.gamePhase = GamePhase.PickEmptyTile
     state.phaseTimerStart = new Date().getTime();
     state.phaseTimerTotal = CHOOSE_EMPTY_TILE_TIMEOUT
+    
   } else if (PlayerAction.PickTilePlayerAction === InGameMoveStatusClient 
     && state.gamePhase == GamePhase.PickStartingTile) {
     // picking a tile with player by clicking on it
@@ -353,15 +397,15 @@ function onInGameMove(player, move, roomState) {
       throw new Error("A tile has already been chosen for this round!")
     }
     
-    state.emptyMapSections = removeItem(state.emptyMapSections, state.emptyMapSections[tile])
-    playerState.mapSections.push(tile)
-    updatePlayerTotalValue(playerState)
+    state.emptyMapSections = removeItem(state.emptyMapSections, data.tile)
+    playerState.mapSections.push(data.tile)
+    updatePlayerTotalValue(playerState, state)
     
     playerState.madePhaseAction = true
   } else if (PlayerAction.PickTilePlayerAction === InGameMoveStatusClient 
     && state.gamePhase == GamePhase.PickEmptyTile) { 
       const playerState = state.playerIdToPlayerState[player.id]
-      if (playerState.battleForTile.size >= 2) {
+      if (playerState.battleForTile.length >= 2) {
         throw new Error("You have chosen enough tiles for this round!")
       }
 
@@ -369,16 +413,24 @@ function onInGameMove(player, move, roomState) {
         throw new Error("Choose an empty tile!")
       } 
 
-      state.battleForTile.push(data.tile)
+      if (playerState.battleForTile.includes(data.tile)) {
+        throw new Error("Choose a different tile!")
+      }
+
+      playerState.battleForTile.push(data.tile)
 
   } else if (InGameMoveStatus.PickEmptyTileEnd === InGameMoveStatusClient) { 
-    pickEmptyTileStage(roomState)
+    if (!isPlayerMaster(roomState, player)) {
+      return {state}
+    }
+
     state.gamePhase = GamePhase.EmptyTileBattle
     state.phaseTimerStart = new Date().getTime();
     state.phaseTimerTotal = BATTLE_EMPTY_TILE_TIMEOUT
     state.question = QUESTIONS_NUMBERS[0]
+
     
-  } else if (PlayerAction.PickTilePlayerAction === InGameMoveStatusClient 
+  } else if (PlayerAction.PickAnswerPlayerAction === InGameMoveStatusClient 
     && state.gamePhase == GamePhase.EmptyTileBattle) { 
       const playerState = state.playerIdToPlayerState[player.id]
       if (playerState.answer != null) {
@@ -388,18 +440,32 @@ function onInGameMove(player, move, roomState) {
       playerState.answer = data.answer
       playerState.timeAnswered = new Date().getTime()
   } else if (InGameMoveStatus.EmptyTileBattleEnd === InGameMoveStatusClient) { 
+    if (!isPlayerMaster(roomState, player)) {
+      return {state}
+    }
+
     // creating bot answers
-    createBotAnswers()
+    createBotAnswers(roomState)
     // should check for winners and give them the tiles
     emptyTileCorrectAnswers(roomState)
     state.gamePhase = GamePhase.ShowEmptyTileBattleAnswers
     state.phaseTimerStart = new Date().getTime();
     state.phaseTimerTotal = BATTLE_EMPTY_TILE_SHOW_ANSWERS_TIMEOUT
+
   } else if (InGameMoveStatus.ShowEmptyTileBattleAnswersEnd === InGameMoveStatusClient) {
-    if (state.emptyMapSections.size == 0) { // end of the empty tile pick battles should go to real battles
-      
+    if (!isPlayerMaster(roomState, player)) {
+      return {state}
+    }
+
+    logger.info("state.emptyMapSections.length ", state.emptyMapSections.length)
+    logger.info("state.emptyMapSections ", state.emptyMapSections)
+   
+    fillTilesFromEmptyTileBattle(roomState)
+    pickEmptyTileStage(roomState)
+    updateAllPlayersTotalValues(roomState)
+    if (state.emptyMapSections.length == 0) { // end of the empty tile pick battles should go to real battles
+    
     } else { // loop until map filled
-      pickEmptyTileStage(roomState)
       state.gamePhase = GamePhase.PickEmptyTile
       state.phaseTimerStart = new Date().getTime();
       state.phaseTimerTotal = CHOOSE_EMPTY_TILE_TIMEOUT
@@ -408,18 +474,94 @@ function onInGameMove(player, move, roomState) {
 
   return { state };
 }
+function fillTilesFromEmptyTileBattle(roomState) { 
+  const { state, players, logger } = roomState;
+
+  const playerWinner1 = state.playerIdToPlayerState[state.answerPlacements[0]]
+  const playerWinner2 = state.playerIdToPlayerState[state.answerPlacements[1]]
+  const playerWinner3 = state.playerIdToPlayerState[state.answerPlacements[2]]
+
+  fillBattleForTileElementsIfEmpty(playerWinner1, roomState, 1)
+
+  if (state.emptyMapSections.includes(playerWinner1.battleForTile[0])) {
+    state.emptyMapSections = removeItem(state.emptyMapSections, playerWinner1.battleForTile[0]) 
+    playerWinner1.mapSections.push(playerWinner1.battleForTile[0])
+  }
+
+  if (playerWinner1.battleForTile.length == 2 && state.emptyMapSections.includes(playerWinner1.battleForTile[1])) {
+    state.emptyMapSections = removeItem(state.emptyMapSections, playerWinner1.battleForTile[1])
+    playerWinner1.mapSections.push(playerWinner1.battleForTile[1])
+  }
+
+  fillBattleForTileElementsIfEmpty(playerWinner2, roomState, 2)
+  if (state.emptyMapSections.length >= 0) {
+    // this can happen if both players have taken the same tiles and the 2nd winner is left with 0 in that case so we generate random one
+    if (!state.emptyMapSections.includes(playerWinner2.battleForTile[0]) && !state.emptyMapSections.includes(playerWinner2.battleForTile[1])) {
+      var randomAvailableTile = getRandomItemFromArray(state.emptyMapSections)
+
+      state.emptyMapSections = removeItem(state.emptyMapSections, randomAvailableTile)
+      playerWinner2.mapSections.push(randomAvailableTile)
+    } else {
+      if (state.emptyMapSections.includes(playerWinner2.battleForTile[0])) {
+        state.emptyMapSections = removeItem(state.emptyMapSections, playerWinner2.battleForTile[0])
+        playerWinner2.mapSections.push(playerWinner2.battleForTile[0])
+      } else if (playerWinner1.battleForTile.length == 2){
+        state.emptyMapSections = removeItem(state.emptyMapSections, playerWinner2.battleForTile[1])
+        playerWinner2.mapSections.push(playerWinner2.battleForTile[1])
+      }
+    }
+  }
+  // reset
+  resetPlayerAfterBatte(playerWinner1)
+  resetPlayerAfterBatte(playerWinner2)
+  resetPlayerAfterBatte(playerWinner3)
+
+}
+function fillBattleForTileElementsIfEmpty( player, roomState, placement) { 
+  const { state, players, logger } = roomState;
+  if (placement == 1) {
+    if (player.battleForTile.length == 0) {
+      var randomElements = getRandomNElementsFromArray(state.emptyMapSections, 2 - player.battleForTile.length)
+      player.battleForTile = randomElements
+    } else if (player.battleForTile.length == 1) {
+      var randomElements = getRandomNElementsFromArray(state.emptyMapSections, 1)
+      player.battleForTile = randomElements
+    }
+  } else {
+    if (player.battleForTile.length == 0) {
+      var randomElements = getRandomNElementsFromArray(state.emptyMapSections, 1)
+      player.battleForTile = randomElements
+    }
+  }
+}
+function resetPlayerAfterBatte(player) { 
+  player.battleForTile = []
+  player.answer = null
+  player.playerTimeAnswered = BATTLE_EMPTY_TILE_TIMEOUT
+}
 
 function emptyTileCorrectAnswers(roomState) { 
   const { state, players, logger } = roomState;
   let playersAnswers = []
   Object.entries(state.playerIdToPlayerState).map(([playerId, player]) => { 
+   let playerAnswer = 0
+   let playerTimeAnswered = BATTLE_EMPTY_TILE_TIMEOUT
+
+   if (player.answer != null) {
+    playerAnswer = player.answer
+    playerTimeAnswered = player.timeAnswered
+   } else {
+    player.answer = playerAnswer
+    player.timeAnswered = playerTimeAnswered
+   }
    playersAnswers.push({
-    answer: player.answer,
-    timeAnswered: player.timeAnswered,
+    answer: playerAnswer,
+    timeAnswered: playerTimeAnswered,
     playerId: playerId
    })
   })
 
+  const correctAnswer = state.question.correctAnswer
   const closest = playersAnswers.sort((a, b) => {
     if (Math.abs(b.answer - correctAnswer) < Math.abs(a.answer - correctAnswer)) {
         return 1;

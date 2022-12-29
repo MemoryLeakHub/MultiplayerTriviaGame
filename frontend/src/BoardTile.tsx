@@ -232,6 +232,7 @@ export class BoardTile {
     //console.log(roomState.state.playerIdToPlayerState)
   
     const players = roomState.state.playerIdToPlayerState as Map<string, Player>
+   
     Object.values(players).forEach(player => {
       const playerHasTileInBattle = player.battleForTile.includes( this.props.config.tilePosition)
       if (player.battleForTile.length != 0 && playerHasTileInBattle ) {

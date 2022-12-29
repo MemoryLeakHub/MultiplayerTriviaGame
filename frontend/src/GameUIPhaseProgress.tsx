@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { CountdownCircleTimer } from 'react-countdown-circle-timer'
 function GameUIPhaseProgress({timeLeft, phase}: {timeLeft, phase}) {
 
+  const [key, setKey] = useState(0);
   const phaseText = () => {
     if (phase == "PickStartingTile") {
       return "Pick Your Starting Tile"
@@ -14,10 +15,14 @@ function GameUIPhaseProgress({timeLeft, phase}: {timeLeft, phase}) {
     }
   }
 
+  useEffect(() => {
+    setKey(key+1)
+  }, [phase]);
   return (
     <div className="w-[200px] h-[220px] absolute top-[200px] left-2 ">
       <div className=" relative">
          <CountdownCircleTimer
+            key={key}
             isPlaying
             duration={timeLeft}
             colors={['#004777', '#F7B801', '#A30000', '#A30000']}

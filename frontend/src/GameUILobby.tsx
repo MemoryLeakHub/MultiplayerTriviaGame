@@ -3,6 +3,7 @@ import GameUILobbyPlayer from "./GameUILobbyPlayer";
 
 function GameUILobby({playerIdToPlayerState, onStartGameClick}: {playerIdToPlayerState, onStartGameClick: any}) {
 
+  console.log(playerIdToPlayerState)
   return (
     <div className="w-full h-full backdrop-blur-xl bg-white/30 relative ">
       <div className="flex h-[720px]">
