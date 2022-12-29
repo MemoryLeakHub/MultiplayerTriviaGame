@@ -10,7 +10,13 @@ function GameUIPhaseProgress({timeLeft, phase}: {timeLeft, phase}) {
       return "Pick 2 Empty tiles"
     } else if (phase == "EmptyTileBattle") {
       return "Give Your Answer"
-    } else { 
+    } else if (phase == "PickTileToAttack") {
+      return "Choose tile to attack"
+    }  else if (phase == "PickTileToAttackBattle") {
+      return "Pick Answer"
+    }  else if (phase == "ShowAnswersPickTileToAttackBattle") {
+      return "Battle Results"
+    }  else { 
       return ""
     }
   }

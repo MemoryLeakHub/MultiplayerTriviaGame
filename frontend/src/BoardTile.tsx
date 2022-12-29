@@ -378,6 +378,7 @@ export class BoardTile {
     const sprite = new Sprite(
       sheetAtlas.textures[peon]
     );
+    sprite.zIndex = 10
     return sprite;
 
   }

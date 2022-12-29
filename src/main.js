@@ -25,17 +25,6 @@ const GamePhase = Object.freeze({
 
   EndGame: 'EndGame',
 });
-const PlayerStatus = Object.freeze({
-  Login: 'Login',
-  Lobby: 'Lobby',
-  InGame: 'InGame',
-});
-
-const TileStatus = Object.freeze({
-  Empty: 'Empty',
-  Taken: 'Taken',
-  ReTaken: 'ReTaken',
-});
 
 const InGameMoveStatus = Object.freeze({
   PickStartingTileEnd: 'PickStartingTileEnd',
@@ -48,6 +37,17 @@ const InGameMoveStatus = Object.freeze({
   PickTileToAttackBattleEnd: 'PickTileToAttackBattleEnd',
   ShowAnswersPickTileToAttackBattleEnd: 'ShowAnswersPickTileToAttackBattleEnd'
 
+});
+const PlayerStatus = Object.freeze({
+  Login: 'Login',
+  Lobby: 'Lobby',
+  InGame: 'InGame',
+});
+
+const TileStatus = Object.freeze({
+  Empty: 'Empty',
+  Taken: 'Taken',
+  ReTaken: 'ReTaken',
 });
 const PlayerAction = Object.freeze({
   PickTilePlayerAction: 'PickTilePlayerAction',
@@ -107,12 +107,12 @@ function onRoomStart(roomState) {
     playerColors: shuffledColors,
     answerPlacements: [],
     playerIdToPlayerState: {},
-    question: null,
+    question: QUESTIONS_PICK[0],
     tileAttackRound: 0,
     tileAttackOrder: [
       PlayerType.RED, PlayerType.BLUE, PlayerType.GREEN,
       PlayerType.BLUE, PlayerType.RED, PlayerType.GREEN,
-      PlayerType.GREEN, PlayerType.BLUE, PlayerType.RED,
+      PlayerType.RED, PlayerType.GREEN, PlayerType.BLUE,
       PlayerType.GREEN, PlayerType.RED, PlayerType.BLUE,
     ],
     tileAttackDefender: null,
@@ -527,7 +527,7 @@ function onInGameMove(player, move, roomState) {
     const attackerId = getCurrentPlayerIdFromAttackOrder(roomState)
     if (state.tileAttackDefender == null) {
       const randomPlayerOpponentId = getRandomOpponentId(roomState, attackerId)
-      const randomTileFromOpponent = getRandomTileFromPlayerById(randomPlayerOpponentId)
+      const randomTileFromOpponent = getRandomTileFromPlayerById(roomState, randomPlayerOpponentId)
       state.tileAttackDefender  = randomPlayerOpponentId
       state.tileAttackDefenderTile = randomTileFromOpponent
     }
@@ -541,7 +541,7 @@ function onInGameMove(player, move, roomState) {
     && state.gamePhase == GamePhase.PickTileToAttackBattle) { 
       const playerState = state.playerIdToPlayerState[player.id]
       
-      if (playerState.type !== state.tileAttackOrder[state.tileAttackRound]) {
+      if (playerState.type !== state.tileAttackOrder[state.tileAttackRound] && player.id !== state.tileAttackDefender) {
         throw new Error("It is not your battle!")
       }
 
@@ -560,7 +560,7 @@ function onInGameMove(player, move, roomState) {
     createBotAnswersPick(roomState)
     // should check for winners and give them the tiles
     battleCorrectAnswers(roomState)
-    state.gamePhase = GamePhase.ShowEmptyTileBattleAnswersEnd
+    state.gamePhase = GamePhase.ShowAnswersPickTileToAttackBattle
     state.phaseTimerStart = new Date().getTime();
     state.phaseTimerTotal = ATTACK_BATTLE_SHOW_ANSWERS_TIMEOUT
 
@@ -568,14 +568,20 @@ function onInGameMove(player, move, roomState) {
     if (!isPlayerMaster(roomState, player)) {
       return {state}
     }
+
     updateWinner(roomState)
     updateAllPlayersTotalValues(roomState)
     resetBattleData(roomState)
+
     // end game
-    if (state.tileAttackRound+1 == state.tileAttackOrder.length) {
+    if (state.tileAttackRound+1 == state.tileAttackOrder.length || checkIfOnlyOneSurvivor(roomState)) {
       state.gamePhase = GamePhase.EndGame
     } else {
-      state.tileAttackRound++
+      if (checkIfNextRoundShouldBeSkipped(roomState)) {
+        state.tileAttackRound += 2
+      } else {
+        state.tileAttackRound++
+      }
       state.gamePhase = GamePhase.PickTileToAttack
       state.phaseTimerStart = new Date().getTime();
       state.phaseTimerTotal = CHOOSE_TILE_TO_ATTACK_TIMEOUT
@@ -583,6 +589,29 @@ function onInGameMove(player, move, roomState) {
   }
 
   return { state };
+}
+function checkIfNextRoundShouldBeSkipped(roomState) { 
+  const { state, players, logger } = roomState;
+
+  const nextRoundAttacker = getCurrentPlayerIdFromNextAttackOrder(roomState, state.tileAttackOrder+1)
+  if (nextRoundAttacker.mapSections.length ==  0 ) {
+    return true
+  }
+
+  return false
+}
+function checkIfOnlyOneSurvivor(roomState) { 
+  const { state, players, logger } = roomState;
+  
+  let surviors = 0
+  Object.entries(state.playerIdToPlayerState).map(([playerId, player]) => { 
+   
+    if (player.mapSections.length >0) {
+      surviors++
+    }
+  })
+
+  return surviors
 }
 function resetBattleData(roomState) { 
   const { state, players, logger } = roomState;
@@ -596,14 +625,14 @@ function resetBattleData(roomState) {
 function updateWinner(roomState) { 
   const { state, players, logger } = roomState;
 
-  if (state.placement.length > 0) {
+  if (state.answerPlacements.length > 0) {
 
     const attackerId = getCurrentPlayerIdFromAttackOrder(roomState)
     const defenderId = state.tileAttackDefender
     const attacker = state.playerIdToPlayerState[attackerId]
     const defender = state.playerIdToPlayerState[defenderId]
 
-    const winnerId = state.placement[0]
+    const winnerId = state.answerPlacements[0]
     // for now only if the attacker wins we give him the tile 
     // nothing happens if the defender wins or if
     if (attackerId == winnerId) {
@@ -615,26 +644,41 @@ function updateWinner(roomState) {
   }
 
 }
-function getRandomTileFromPlayerById(playerId) {
+function getRandomTileFromPlayerById(roomState, playerId) {
+  const { state, players, logger } = roomState;
   const player = state.playerIdToPlayerState[playerId]
 
   return getRandomItemFromArray(player.mapSections)
 }
-function getCurrentPlayerIdFromAttackOrder(roomState) { 
+function getCurrentPlayerIdFromNextAttackOrder(roomState, attackRound) { 
   const { state, players, logger } = roomState;
 
+  let playerIdFromOrder = ""
   Object.entries(state.playerIdToPlayerState).map(([playerId, player]) => { 
-    if (player.type == state.tileAttackOrder[state.tileAttackRound]) {
-      return playerId
+    if (player.type == state.tileAttackOrder[attackRound]) {
+      playerIdFromOrder =  playerId
     }
   })
 
-  return null
+  return playerIdFromOrder
+}
+function getCurrentPlayerIdFromAttackOrder(roomState) { 
+  const { state, players, logger } = roomState;
+
+  let playerIdFromOrder = ""
+  Object.entries(state.playerIdToPlayerState).map(([playerId, player]) => { 
+    if (player.type == state.tileAttackOrder[state.tileAttackRound]) {
+      playerIdFromOrder =  playerId
+    }
+  })
+
+  return playerIdFromOrder
 }
 function getRandomOpponentId(roomState, currentPlayerId) { 
   return getRandomItemFromArray(getOpponents(roomState, currentPlayerId))
 }
 function getOpponents(roomState, currentPlayerId) {
+  const { state, players, logger } = roomState;
   let opponents = []
   Object.entries(state.playerIdToPlayerState).map(([playerId, player]) => { 
     if (currentPlayerId != playerId) {
@@ -787,23 +831,28 @@ function createBotAnswersPick(roomState) {
   const attacker = state.playerIdToPlayerState[attackerId]
   const defender = state.playerIdToPlayerState[state.tileAttackDefender]
 
+  logger.info("attackerid: ", attackerId)
+  logger.info("state.tileAttackDefender: ", state.tileAttackDefender)
+  logger.info("attacker: ", attacker)
+  logger.info("defender: ", defender)
   if (attacker.isBot) {
-    generateBotAnswersPick(attacker)
+    generateBotAnswersPick(roomState, attacker)
   }
 
   if (defender.isBot) {
-    generateBotAnswersPick(defender)
+    generateBotAnswersPick(roomState, defender)
   }
 }
 
-function generateBotAnswersPick(bot) { 
+function generateBotAnswersPick(roomState, bot) { 
+  const { state, players, logger } = roomState;
   const botTimeRange = randomIntFromInterval(state.botTimeRange[0],state.botTimeRange[1])
   if (randomIntFromInterval(0,100) < state.botDifficulty ) {
-    bot.answer = state.question.answer
+    bot.answer = state.question.correctAnswer
   } else {
     bot.answer = randomIntFromInterval(0,3)
   }
-  player.timeAnswered = new Date().getTime(); + botTimeRange
+  bot.timeAnswered = new Date().getTime(); + botTimeRange
 }
 function createBotAnswersNumber(roomState) { 
   const { state, players, logger } = roomState;

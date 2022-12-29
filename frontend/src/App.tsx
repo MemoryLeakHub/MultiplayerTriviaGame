@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
-import { Application, Sprite, Container } from "pixi.js";
+import { Application, Sprite, Container, State } from "pixi.js";
 import { BoardTile } from "./BoardTile";
 import { tilesList } from "./Tiles";
 import GameUiLogin from "./GameUILogin";
@@ -11,6 +11,8 @@ import GameUIPlayers from "./GameUIPlayers";
 import GameUIPhaseProgress from "./GameUIPhaseProgress"
 import GameUIQuestion from "./GameUIQuestion"
 import "./styles.css"
+import GameUIQuestionPicker from "./GameUIQuestionPicker";
+import GameUIEndGame from "./GameUIEndGame";
 function App() {
   const canvasEle = useRef(null);
   const [roomState, setRoomState] = useState(client.getRoomState() || {});
@@ -39,9 +41,11 @@ function App() {
   } = roomState;
 
   const onTileClick = (tile: number) => {
-    console.log("onTileClick: ", tile)
-    // if (roomState.state.gamePhase == "PickStartingTile") {
-      client.makeMove({ InGameMoveStatusClient: "PickTilePlayerAction", data: {tile:tile} }).then(({ error }) => {
+      let tileClickEvent = "PickTilePlayerAction"
+      if (gamePhase == "PickTileToAttack") {
+        tileClickEvent = "PickTileToAttackBattleAnswerPlayerAction"
+      }
+      client.makeMove({ InGameMoveStatusClient: tileClickEvent, data: {tile:tile} }).then(({ error }) => {
         if (error != null) {
           throw new Error(error.message);
         }
@@ -51,7 +55,7 @@ function App() {
           autoHideDuration: 3000,
         });
       });
-    // }
+    
   };
 
   useEffect(() => {
@@ -79,53 +83,86 @@ function App() {
      
         console.log("time : " + left);
         if (left <= 0) {
-          if (gamePhase == "PickStartingTile") {
-            client.makeMove({ InGameMoveStatusClient: "PickStartingTileEnd", data: {tile: -1} }).then(({ error }) => {
-              if (error != null) {
-                throw new Error(error.message);
-              }
-            }).catch((error) => {
-              enqueueSnackbar(error.message, {
-                variant: 'error',
-                autoHideDuration: 3000,
+          if (roomState.state.playerIdToPlayerState[curPlr.id].isMaster) {
+            if (gamePhase == "PickStartingTile") {
+              client.makeMove({ InGameMoveStatusClient: "PickStartingTileEnd", data: {tile: -1} }).then(({ error }) => {
+                if (error != null) {
+                  throw new Error(error.message);
+                }
+              }).catch((error) => {
+                enqueueSnackbar(error.message, {
+                  variant: 'error',
+                  autoHideDuration: 3000,
+                });
               });
-            });
-          } else if (gamePhase == "PickEmptyTile") {
-            client.makeMove({ InGameMoveStatusClient: "PickEmptyTileEnd" }).then(({ error }) => {
-              if (error != null) {
-                throw new Error(error.message);
-              }
-            }).catch((error) => {
-              enqueueSnackbar(error.message, {
-                variant: 'error',
-                autoHideDuration: 3000,
+            } else if (gamePhase == "PickEmptyTile") {
+              client.makeMove({ InGameMoveStatusClient: "PickEmptyTileEnd" }).then(({ error }) => {
+                if (error != null) {
+                  throw new Error(error.message);
+                }
+              }).catch((error) => {
+                enqueueSnackbar(error.message, {
+                  variant: 'error',
+                  autoHideDuration: 3000,
+                });
               });
-            });
-          } else if (gamePhase == "EmptyTileBattle") {
-            client.makeMove({ InGameMoveStatusClient: "EmptyTileBattleEnd" }).then(({ error }) => {
-              if (error != null) {
-                throw new Error(error.message);
-              }
-            }).catch((error) => {
-              enqueueSnackbar(error.message, {
-                variant: 'error',
-                autoHideDuration: 3000,
+            } else if (gamePhase == "EmptyTileBattle") {
+              client.makeMove({ InGameMoveStatusClient: "EmptyTileBattleEnd" }).then(({ error }) => {
+                if (error != null) {
+                  throw new Error(error.message);
+                }
+              }).catch((error) => {
+                enqueueSnackbar(error.message, {
+                  variant: 'error',
+                  autoHideDuration: 3000,
+                });
               });
-            });
-          } else if (gamePhase == "ShowEmptyTileBattleAnswers") {
-            client.makeMove({ InGameMoveStatusClient: "ShowEmptyTileBattleAnswersEnd" }).then(({ error }) => {
-              if (error != null) {
-                throw new Error(error.message);
-              }
-            }).catch((error) => {
-              enqueueSnackbar(error.message, {
-                variant: 'error',
-                autoHideDuration: 3000,
+            } else if (gamePhase == "ShowEmptyTileBattleAnswers") {
+              client.makeMove({ InGameMoveStatusClient: "ShowEmptyTileBattleAnswersEnd" }).then(({ error }) => {
+                if (error != null) {
+                  throw new Error(error.message);
+                }
+              }).catch((error) => {
+                enqueueSnackbar(error.message, {
+                  variant: 'error',
+                  autoHideDuration: 3000,
+                });
               });
-            });
+            } else if (gamePhase == "PickTileToAttack") {
+              client.makeMove({ InGameMoveStatusClient: "PickTileToAttackEnd" }).then(({ error }) => {
+                if (error != null) {
+                  throw new Error(error.message);
+                }
+              }).catch((error) => {
+                enqueueSnackbar(error.message, {
+                  variant: 'error',
+                  autoHideDuration: 3000,
+                });
+              });
+            } else if (gamePhase == "PickTileToAttackBattle") {
+              client.makeMove({ InGameMoveStatusClient: "PickTileToAttackBattleEnd" }).then(({ error }) => {
+                if (error != null) {
+                  throw new Error(error.message);
+                }
+              }).catch((error) => {
+                enqueueSnackbar(error.message, {
+                  variant: 'error',
+                  autoHideDuration: 3000,
+                });
+              });
+            } else if (gamePhase == "ShowAnswersPickTileToAttackBattle") {
+              client.makeMove({ InGameMoveStatusClient: "ShowAnswersPickTileToAttackBattleEnd" }).then(({ error }) => {
+                if (error != null) {
+                  throw new Error(error.message);
+                }
+              }).catch((error) => {
+                enqueueSnackbar(error.message, {
+                  variant: 'error',
+                  autoHideDuration: 3000,
+                });
+              });
+            }
           }
-
-          
           clearInterval(intervalId);
         }
       }, 1000)
@@ -265,8 +302,20 @@ function App() {
     };
   }, []);
 
-  const onAnswerClick = answer  => {
+  const onAnswerNumberClick = answer  => {
     client.makeMove({ InGameMoveStatusClient: "PickAnswerPlayerAction", data: {answer:answer} }).then(({ error }) => {
+      if (error != null) {
+        throw new Error(error.message);
+      }
+    }).catch((error) => {
+      enqueueSnackbar(error.message, {
+        variant: 'error',
+        autoHideDuration: 3000,
+      });
+    });
+  }
+  const onAnswerPickClick = answer  => {
+    client.makeMove({ InGameMoveStatusClient: "PickTileToAttackBattleAnswerPlayerAction", data: {answer:answer} }).then(({ error }) => {
       if (error != null) {
         throw new Error(error.message);
       }
@@ -308,11 +357,11 @@ function App() {
         <canvas ref={canvasEle} />
         { // if we are not in the game show the Login or Lobby
             (status !== "InGame") ? 
-            <div className="w-[1200px] h-[720px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="w-[1200px] h-[720px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 ">
               {(!showLobby) ? // is not logged
                  <GameUiLogin preLoadProgress={preLoadProgress} showLogin={showLogin} onLoginClick={onLoginClick} /> 
                  : 
-                 <GameUILobby playerIdToPlayerState={playerIdToPlayerState} onStartGameClick={onStartGameClick} /> 
+                 <GameUILobby playerIdToPlayerState={playerIdToPlayerState} onStartGameClick={onStartGameClick} curPlayer={curPlr} /> 
               }
             </div>
             : (status == "InGame") ? 
@@ -322,10 +371,19 @@ function App() {
                 <GameUIPhaseProgress timeLeft={timeLeft} phase={gamePhase}/>
                 {
                   (gamePhase == "EmptyTileBattle" || gamePhase == "ShowEmptyTileBattleAnswers") ? 
-                  <GameUIQuestion state={roomState.state} curPlayer={curPlr} onAnswer={onAnswerClick} />
+                  <GameUIQuestion state={roomState.state} curPlayer={curPlr} onAnswer={onAnswerNumberClick} />
                   : ""
                 }
-                
+                {
+                  (gamePhase == "PickTileToAttackBattle" || gamePhase == "ShowAnswersPickTileToAttackBattle") ? 
+                  <GameUIQuestionPicker state={roomState.state} curPlayer={curPlr} onAnswer={onAnswerPickClick} />
+                  : ""
+                }
+                {
+                  (gamePhase == "EndGame" ) ? 
+                  <GameUIEndGame />
+                  : ""
+                }
               </div>
               
             :  ""
