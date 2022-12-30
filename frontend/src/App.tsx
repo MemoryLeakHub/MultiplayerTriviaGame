@@ -88,7 +88,6 @@ function App() {
       const intervalId = setInterval(() => {  
         var left = Math.round(getTimeLeftSecs(phaseTimerStart, phaseTimerTotal))
      
-        // console.log("time : " + left);
         if (left <= 0) {
           if (roomState.state.playerIdToPlayerState[curPlr.id].isMaster) {
             if (gamePhase == "PickStartingTile") {
