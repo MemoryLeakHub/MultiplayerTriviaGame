@@ -1,11 +1,10 @@
-import React, { useRef, useEffect, useState } from "react";
-import { Application, Sprite, Container, State } from "pixi.js";
+import { useRef, useEffect, useState } from "react";
+import { Application, Sprite, Container } from "pixi.js";
 import { BoardTile } from "./BoardTile";
 import { tilesList } from "./Tiles";
 import GameUiLogin from "./GameUILogin";
 import GameUILobby from "./GameUILobby";
 import client from '@urturn/client'
-import { Timer } from "easytimer.js";
 import { useSnackbar } from 'notistack';
 import GameUIPlayers from "./GameUIPlayers";
 import GameUIPhaseProgress from "./GameUIPhaseProgress"
@@ -32,28 +31,20 @@ function App() {
       status = "",
       gamePhase = "",
       playerIdToPlayerState = {},
-      question = {},
-      tileAttackRound = 0,
-      tileAttackOrder = [],
-      tileAttackDefender = null,
-      answerPlacements = [],
-      mapConnectedSections = [],
       phaseTimerStart = null,
       phaseTimerTotal = null
     } = {},
-    roomStartContext,
-    players = [], finished,
   } = roomState;
 
   const onTileClick = (tile: number,currentGamePhase: string) => {
       let tileClickEvent = "PickTilePlayerAction"
-      if (currentGamePhase == "PickTileToAttack") {
+      if (currentGamePhase === "PickTileToAttack") {
         tileClickEvent = "PickTileToAttackPlayerAction"
       }
       // console.log("onTileClick gamePhase: ", currentGamePhase)
       // console.log("onTileClick: ", tileClickEvent)
       client.makeMove({ InGameMoveStatusClient: tileClickEvent, data: {tile:tile} }).then(({ error }) => {
-        if (error != null) {
+        if (error !== null) {
           throw new Error(error.message);
         }
       }).catch((error) => {
@@ -81,7 +72,7 @@ function App() {
   }
 
   useEffect(() => {
-    if (phaseTimerStart != null && phaseTimerTotal != null ) {
+    if (phaseTimerStart !== null && phaseTimerTotal !== null ) {
       
       var timeLeft = Math.round(getTimeLeftSecs(phaseTimerStart, phaseTimerTotal))
       setTimeLeft(timeLeft)
@@ -90,9 +81,9 @@ function App() {
      
         if (left <= 0) {
           if (roomState.state.playerIdToPlayerState[curPlr.id].isMaster) {
-            if (gamePhase == "PickStartingTile") {
+            if (gamePhase === "PickStartingTile") {
               client.makeMove({ InGameMoveStatusClient: "PickStartingTileEnd", data: {tile: -1} }).then(({ error }) => {
-                if (error != null) {
+                if (error !== null) {
                   throw new Error(error.message);
                 }
               }).catch((error) => {
@@ -101,9 +92,9 @@ function App() {
                   autoHideDuration: 3000,
                 });
               });
-            } else if (gamePhase == "PickEmptyTile") {
+            } else if (gamePhase === "PickEmptyTile") {
               client.makeMove({ InGameMoveStatusClient: "PickEmptyTileEnd" }).then(({ error }) => {
-                if (error != null) {
+                if (error !== null) {
                   throw new Error(error.message);
                 }
               }).catch((error) => {
@@ -112,9 +103,9 @@ function App() {
                   autoHideDuration: 3000,
                 });
               });
-            } else if (gamePhase == "EmptyTileBattle") {
+            } else if (gamePhase === "EmptyTileBattle") {
               client.makeMove({ InGameMoveStatusClient: "EmptyTileBattleEnd" }).then(({ error }) => {
-                if (error != null) {
+                if (error !== null) {
                   throw new Error(error.message);
                 }
               }).catch((error) => {
@@ -123,9 +114,9 @@ function App() {
                   autoHideDuration: 3000,
                 });
               });
-            } else if (gamePhase == "ShowEmptyTileBattleAnswers") {
+            } else if (gamePhase === "ShowEmptyTileBattleAnswers") {
               client.makeMove({ InGameMoveStatusClient: "ShowEmptyTileBattleAnswersEnd" }).then(({ error }) => {
-                if (error != null) {
+                if (error !== null) {
                   throw new Error(error.message);
                 }
               }).catch((error) => {
@@ -134,9 +125,9 @@ function App() {
                   autoHideDuration: 3000,
                 });
               });
-            } else if (gamePhase == "PickTileToAttack") {
+            } else if (gamePhase === "PickTileToAttack") {
               client.makeMove({ InGameMoveStatusClient: "PickTileToAttackEnd" }).then(({ error }) => {
-                if (error != null) {
+                if (error !== null) {
                   throw new Error(error.message);
                 }
               }).catch((error) => {
@@ -145,9 +136,9 @@ function App() {
                   autoHideDuration: 3000,
                 });
               });
-            } else if (gamePhase == "PickTileToAttackBattle") {
+            } else if (gamePhase === "PickTileToAttackBattle") {
               client.makeMove({ InGameMoveStatusClient: "PickTileToAttackBattleEnd" }).then(({ error }) => {
-                if (error != null) {
+                if (error !== null) {
                   throw new Error(error.message);
                 }
               }).catch((error) => {
@@ -156,9 +147,9 @@ function App() {
                   autoHideDuration: 3000,
                 });
               });
-            } else if (gamePhase == "ShowAnswersPickTileToAttackBattle") {
+            } else if (gamePhase === "ShowAnswersPickTileToAttackBattle") {
               client.makeMove({ InGameMoveStatusClient: "ShowAnswersPickTileToAttackBattleEnd" }).then(({ error }) => {
-                if (error != null) {
+                if (error !== null) {
                   throw new Error(error.message);
                 }
               }).catch((error) => {
@@ -196,7 +187,7 @@ function App() {
     if (!assetsFinishedLoading) {
       return;
     }
-    if (roomState == null || curPlr == null) {
+    if (roomState === null || curPlr === null) {
       return;
     }
     const currentPlayer = playerIdToPlayerState[curPlr.id]
@@ -218,7 +209,7 @@ function App() {
 
   useEffect(() => {
     console.log("gamePhase tiles : " + gamePhase)
-    if (tiles != null) {
+    if (tiles !== null) {
       tiles.map((currentTile:BoardTile) => {
         currentTile.updateState(roomState)
       })
@@ -265,7 +256,7 @@ function App() {
     ].forEach(r => { game.loader.add(r); });
     game.loader.onProgress.add((loader, resources) => { 
       setPreLoadProgress(loader.progress)
-      if (Math.round(loader.progress) == 100) {
+      if (Math.round(loader.progress) === 100) {
         setAssetsFInishedLoading(true)
       }
     });
@@ -310,7 +301,7 @@ function App() {
 
   const onAnswerNumberClick = answer  => {
     client.makeMove({ InGameMoveStatusClient: "PickAnswerPlayerAction", data: {answer:answer} }).then(({ error }) => {
-      if (error != null) {
+      if (error !== null) {
         throw new Error(error.message);
       }
     }).catch((error) => {
@@ -322,7 +313,7 @@ function App() {
   }
   const onAnswerPickClick = answer  => {
     client.makeMove({ InGameMoveStatusClient: "PickTileToAttackBattleAnswerPlayerAction", data: {answer:answer} }).then(({ error }) => {
-      if (error != null) {
+      if (error !== null) {
         throw new Error(error.message);
       }
     }).catch((error) => {
@@ -335,7 +326,7 @@ function App() {
 
   const onLoginClick = username => {
     client.makeMove({ username: username }).then(({ error }) => {
-      if (error != null) {
+      if (error !== null) {
         throw new Error(error.message);
       }
     }).catch((error) => {
@@ -347,7 +338,7 @@ function App() {
   }
   const onStartGameClick = () => {
    client.makeMove({ startGame: true }).then(({ error }) => {
-    if (error != null) {
+    if (error !== null) {
       throw new Error(error.message);
     }
   }).catch((error) => {
@@ -371,7 +362,7 @@ function App() {
                  <GameUILobby playerIdToPlayerState={playerIdToPlayerState} onStartGameClick={onStartGameClick} curPlayer={curPlr} /> 
               }
             </div>
-            : (status == "InGame") ? 
+            : (status === "InGame") ? 
               <div>
                 <GameUIPlayers playerIdToPlayerState={playerIdToPlayerState} />
 

@@ -237,9 +237,9 @@ export class BoardTile {
     Object.values(players).forEach(player => {
       const playerHasTileInBattle = player.battleForTile.includes( this.props.config.tilePosition)
       if (player.battleForTile.length != 0 && playerHasTileInBattle ) {
-        if (player.type == TileType.PLAYER_BLUE) {
+        if (player.type === TileType.PLAYER_BLUE) {
           this.bluePeon.alpha = 1
-        } else if (player.type == TileType.PLAYER_GREEN)  {
+        } else if (player.type === TileType.PLAYER_GREEN)  {
           this.greenPeon.alpha = 1
         } else {
           this.redPeon.alpha = 1;
@@ -249,12 +249,12 @@ export class BoardTile {
      
     // console.log("roomState.state.tileAttackDefenderTile : ", roomState.state.tileAttackDefenderTile)
     // console.log("this.props.config.tilePosition : ", this.props.config.tilePosition)
-    if (roomState.state.tileAttackDefenderTile == this.props.config.tilePosition) {
+    if (roomState.state.tileAttackDefenderTile === this.props.config.tilePosition) {
         const attackerType = roomState.state.tileAttackOrder[roomState.state.tileAttackRound]
         //console.log("attackerType : ", attackerType)
-        if (attackerType == TileType.PLAYER_BLUE) {
+        if (attackerType === TileType.PLAYER_BLUE) {
           this.bluePeon.alpha = 1
-        } else if (attackerType == TileType.PLAYER_GREEN)  {
+        } else if (attackerType === TileType.PLAYER_GREEN)  {
           this.greenPeon.alpha = 1
         } else {
           this.redPeon.alpha = 1;
