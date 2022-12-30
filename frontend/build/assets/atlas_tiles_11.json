@@ -1,0 +1,111 @@
+{
+  "frames": {
+    "map_segment_blue_11.png": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 85,
+        "h": 261
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 85,
+        "h": 261
+      },
+      "sourceSize": {
+        "w": 85,
+        "h": 261
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "map_segment_green_11.png": {
+      "frame": {
+        "x": 0,
+        "y": 261,
+        "w": 85,
+        "h": 261
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 85,
+        "h": 261
+      },
+      "sourceSize": {
+        "w": 85,
+        "h": 261
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "map_segment_grey_11.png": {
+      "frame": {
+        "x": 0,
+        "y": 522,
+        "w": 85,
+        "h": 261
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 85,
+        "h": 261
+      },
+      "sourceSize": {
+        "w": 85,
+        "h": 261
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "map_segment_red_11.png": {
+      "frame": {
+        "x": 0,
+        "y": 783,
+        "w": 85,
+        "h": 261
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 85,
+        "h": 261
+      },
+      "sourceSize": {
+        "w": 85,
+        "h": 261
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  },
+  "meta": {
+    "app": "http://free-tex-packer.com",
+    "version": "0.6.7",
+    "image": "atlas_tiles_11.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 85,
+      "h": 1044
+    },
+    "scale": 1
+  }
+}

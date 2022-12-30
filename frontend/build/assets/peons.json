@@ -1,0 +1,87 @@
+{
+  "frames": {
+    "red_peon.png": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 36,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 36,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 36,
+        "h": 40
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "blue_peon.png": {
+      "frame": {
+        "x": 0,
+        "y": 40,
+        "w": 36,
+        "h": 39
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 36,
+        "h": 39
+      },
+      "sourceSize": {
+        "w": 36,
+        "h": 40
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "green_peon.png": {
+      "frame": {
+        "x": 0,
+        "y": 79,
+        "w": 36,
+        "h": 39
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 36,
+        "h": 39
+      },
+      "sourceSize": {
+        "w": 36,
+        "h": 40
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  },
+  "meta": {
+    "app": "http://free-tex-packer.com",
+    "version": "0.6.7",
+    "image": "peons.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 36,
+      "h": 118
+    },
+    "scale": 1
+  }
+}
