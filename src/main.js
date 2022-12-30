@@ -1,7 +1,9 @@
 import {
   getRandomItemFromArray, removeItem, getRandomNElementsFromArray, randomIntFromInterval
 } from './utils';
-
+import {
+  QUESTIONS_NUMBERS, QUESTIONS_PICK
+} from './questions';
 const PlayerType = Object.freeze({
   RED: 0,
   BLUE: 1,
@@ -55,36 +57,19 @@ const PlayerAction = Object.freeze({
   PickTileToAttackPlayerAction: 'PickTileToAttackPlayerAction',
   PickTileToAttackBattleAnswerPlayerAction: 'PickTileToAttackBattleAnswerPlayerAction'
 });
-const CHOOSE_STARTING_POSITION_TIMEOUT = 3000; 
+const CHOOSE_STARTING_POSITION_TIMEOUT = 8000; 
 
-const CHOOSE_EMPTY_TILE_TIMEOUT = 3000; 
-const BATTLE_EMPTY_TILE_TIMEOUT = 3000; 
-const BATTLE_EMPTY_TILE_SHOW_ANSWERS_TIMEOUT = 3000; 
+const CHOOSE_EMPTY_TILE_TIMEOUT = 8000; 
+const BATTLE_EMPTY_TILE_TIMEOUT = 14000; 
+const BATTLE_EMPTY_TILE_SHOW_ANSWERS_TIMEOUT = 4000; 
 
-const CHOOSE_TILE_TO_ATTACK_TIMEOUT = 3000; 
-const ATTACK_BATTLE_TIMEOUT = 3000; 
-const ATTACK_BATTLE_SHOW_ANSWERS_TIMEOUT = 3000; 
+const CHOOSE_TILE_TO_ATTACK_TIMEOUT = 8000; 
+const ATTACK_BATTLE_TIMEOUT = 14000; 
+const ATTACK_BATTLE_SHOW_ANSWERS_TIMEOUT = 4000; 
 
 // playerIdToPlayerState[id] = playerState 
 // -- status -> Status
-const QUESTIONS_PICK = [
-  {
-    text:"What color is the sky",
-    answers: ["Blue","Red","Green","Yellow"],
-    type: 1,
-    correctAnswer: 0,
-    botRange: [],
-  }
-]
-const QUESTIONS_NUMBERS = [
-  {
-    text:"How much is 2*2",
-    answers: [],
-    type: 0,
-    correctAnswer: 4,
-    botRange: [0,10]
-  }
-]
+
 
 function onRoomStart(roomState) {
   const { logger } = roomState;
@@ -94,7 +79,6 @@ function onRoomStart(roomState) {
   const colors = [PlayerType.BLUE, PlayerType.RED, PlayerType.GREEN]
   const shuffledColors = colors.sort((a, b) => 0.5 - Math.random());
 
-  
   
   let state =  {
     status: GameStatus.PrepGame,
@@ -209,7 +193,7 @@ function onPlayerJoin(player, roomState) {
   //logger.warn('TODO: implement how to change the roomState when a player joins')
 
   const playerState = state.playerIdToPlayerState[player.id]
-  if (playerState === undefined) {
+  if (playerState == undefined) {
     state.playerIdToPlayerState[player.id] = {
       status: PlayerStatus.Login,
       type: state.playerColors[state.numberOfPlayers],
@@ -251,9 +235,9 @@ function onPlayerMove(player, move, roomState) {
   //logger.warn('1111')
   switch (status) {
     case GameStatus.PrepGame:
-      if (playerState.status === PlayerStatus.Login) {
+      if (playerState.status == PlayerStatus.Login) {
         return onLoginMove(player, move, roomState);
-      } else if (playerState.status === PlayerStatus.Lobby){ 
+      } else if (playerState.status == PlayerStatus.Lobby){ 
         return onLobbyMove(player, move, roomState);
       }
     case GameStatus.InGame:
@@ -292,7 +276,7 @@ function onLobbyMove(player, move, roomState) {
     players.map((player) => { 
       player.status = PlayerStatus.InGame
     })
-    logger.info('onLobbyMove:')
+    // logger.info('onLobbyMove:')
     state.status = GameStatus.InGame
     state.gamePhase = GamePhase.PickStartingTile
     state.phaseTimerStart = new Date().getTime();
@@ -312,7 +296,9 @@ function updatePlayerTotalValue(entity, state) {
     // if (section.status == TileStatus.ReTaken) {
     //   value = 300
     // }
-    totalValue += value
+    if (element != null) {
+      totalValue += value
+    }
   });
   entity.totalValue = totalValue
 }
@@ -402,7 +388,7 @@ function onInGameMove(player, move, roomState) {
 
   const { InGameMoveStatusClient, data } = move
   // after the 1st ever round of picking a starting tile has ended
-  if (InGameMoveStatus.PickStartingTileEnd === InGameMoveStatusClient) {
+  if (InGameMoveStatus.PickStartingTileEnd == InGameMoveStatusClient) {
     if (!isPlayerMaster(roomState, player)) {
       return {state}
     }
@@ -414,7 +400,7 @@ function onInGameMove(player, move, roomState) {
     state.phaseTimerStart = new Date().getTime();
     state.phaseTimerTotal = CHOOSE_EMPTY_TILE_TIMEOUT
     
-  } else if (PlayerAction.PickTilePlayerAction === InGameMoveStatusClient 
+  } else if (PlayerAction.PickTilePlayerAction == InGameMoveStatusClient 
     && state.gamePhase == GamePhase.PickStartingTile) {
     // picking a tile with player by clicking on it
     const playerState = state.playerIdToPlayerState[player.id]
@@ -431,7 +417,7 @@ function onInGameMove(player, move, roomState) {
     updatePlayerTotalValue(playerState, state)
     
     playerState.madePhaseAction = true
-  } else if (PlayerAction.PickTilePlayerAction === InGameMoveStatusClient 
+  } else if (PlayerAction.PickTilePlayerAction == InGameMoveStatusClient 
     && state.gamePhase == GamePhase.PickEmptyTile) { 
       const playerState = state.playerIdToPlayerState[player.id]
       if (playerState.battleForTile.length >= 2) {
@@ -448,7 +434,7 @@ function onInGameMove(player, move, roomState) {
 
       playerState.battleForTile.push(data.tile)
 
-  } else if (InGameMoveStatus.PickEmptyTileEnd === InGameMoveStatusClient) { 
+  } else if (InGameMoveStatus.PickEmptyTileEnd == InGameMoveStatusClient) { 
     if (!isPlayerMaster(roomState, player)) {
       return {state}
     }
@@ -458,7 +444,7 @@ function onInGameMove(player, move, roomState) {
     state.question = getRandomItemFromArray(QUESTIONS_NUMBERS)
 
     
-  } else if (PlayerAction.PickAnswerPlayerAction === InGameMoveStatusClient 
+  } else if (PlayerAction.PickAnswerPlayerAction == InGameMoveStatusClient 
     && state.gamePhase == GamePhase.EmptyTileBattle) { 
       const playerState = state.playerIdToPlayerState[player.id]
       if (playerState.answer != null) {
@@ -467,7 +453,7 @@ function onInGameMove(player, move, roomState) {
 
       playerState.answer = data.answer
       playerState.timeAnswered = new Date().getTime()
-  } else if (InGameMoveStatus.EmptyTileBattleEnd === InGameMoveStatusClient) { 
+  } else if (InGameMoveStatus.EmptyTileBattleEnd == InGameMoveStatusClient) { 
     if (!isPlayerMaster(roomState, player)) {
       return {state}
     }
@@ -480,13 +466,13 @@ function onInGameMove(player, move, roomState) {
     state.phaseTimerStart = new Date().getTime();
     state.phaseTimerTotal = BATTLE_EMPTY_TILE_SHOW_ANSWERS_TIMEOUT
 
-  } else if (InGameMoveStatus.ShowEmptyTileBattleAnswersEnd === InGameMoveStatusClient) {
+  } else if (InGameMoveStatus.ShowEmptyTileBattleAnswersEnd == InGameMoveStatusClient) {
     if (!isPlayerMaster(roomState, player)) {
       return {state}
     }
 
-    logger.info("state.emptyMapSections.length ", state.emptyMapSections.length)
-    logger.info("state.emptyMapSections ", state.emptyMapSections)
+    // logger.info("state.emptyMapSections.length ", state.emptyMapSections.length)
+    // logger.info("state.emptyMapSections ", state.emptyMapSections)
    
     fillTilesFromEmptyTileBattle(roomState)
     pickEmptyTileStage(roomState)
@@ -500,11 +486,11 @@ function onInGameMove(player, move, roomState) {
       state.phaseTimerStart = new Date().getTime();
       state.phaseTimerTotal = CHOOSE_EMPTY_TILE_TIMEOUT
     }
-  } else if (PlayerAction.PickTileToAttackPlayerAction === InGameMoveStatusClient 
+  } else if (PlayerAction.PickTileToAttackPlayerAction == InGameMoveStatusClient 
     && state.gamePhase == GamePhase.PickTileToAttack) { 
       const playerState = state.playerIdToPlayerState[player.id]
 
-      if (playerState.type !== state.tileAttackOrder[state.tileAttackRound]) {
+      if (playerState.type != state.tileAttackOrder[state.tileAttackRound]) {
         throw new Error("It is not your turn!")
       }
 
@@ -519,25 +505,28 @@ function onInGameMove(player, move, roomState) {
       state.tileAttackDefender = getPlayerFromTile(roomState, data.tile)
       state.tileAttackDefenderTile = data.tile
   
-  } else if (InGameMoveStatus.PickTileToAttackEnd === InGameMoveStatusClient) {
+      // logger.info("PickTileToAttackPlayerAction : ", state.tileAttackDefender)
+  } else if (InGameMoveStatus.PickTileToAttackEnd == InGameMoveStatusClient) {
     if (!isPlayerMaster(roomState, player)) {
       return {state}
     }
 
     const attackerId = getCurrentPlayerIdFromAttackOrder(roomState)
     if (state.tileAttackDefender == null) {
+      // logger.info("PickTileToAttackPlayerAction tileAttackDefender null: ")
       const randomPlayerOpponentId = getRandomOpponentId(roomState, attackerId)
       const randomTileFromOpponent = getRandomTileFromPlayerById(roomState, randomPlayerOpponentId)
       state.tileAttackDefender  = randomPlayerOpponentId
       state.tileAttackDefenderTile = randomTileFromOpponent
     }
+    // logger.info("PickTileToAttackPlayerAction tileAttackDefender not null: ", state.tileAttackDefender)
 
     state.gamePhase = GamePhase.PickTileToAttackBattle
     state.phaseTimerStart = new Date().getTime();
     state.phaseTimerTotal = ATTACK_BATTLE_TIMEOUT
     state.question = getRandomItemFromArray(QUESTIONS_PICK)
 
-  } else if (PlayerAction.PickTileToAttackBattleAnswerPlayerAction === InGameMoveStatusClient 
+  } else if (PlayerAction.PickTileToAttackBattleAnswerPlayerAction == InGameMoveStatusClient 
     && state.gamePhase == GamePhase.PickTileToAttackBattle) { 
       const playerState = state.playerIdToPlayerState[player.id]
       
@@ -551,7 +540,7 @@ function onInGameMove(player, move, roomState) {
 
       playerState.answer = data.answer
       playerState.timeAnswered = new Date().getTime()
-  } else if (InGameMoveStatus.PickTileToAttackBattleEnd === InGameMoveStatusClient) { 
+  } else if (InGameMoveStatus.PickTileToAttackBattleEnd == InGameMoveStatusClient) { 
     if (!isPlayerMaster(roomState, player)) {
       return {state}
     }
@@ -564,7 +553,7 @@ function onInGameMove(player, move, roomState) {
     state.phaseTimerStart = new Date().getTime();
     state.phaseTimerTotal = ATTACK_BATTLE_SHOW_ANSWERS_TIMEOUT
 
-  } else if (InGameMoveStatus.ShowAnswersPickTileToAttackBattleEnd === InGameMoveStatusClient) {
+  } else if (InGameMoveStatus.ShowAnswersPickTileToAttackBattleEnd == InGameMoveStatusClient) {
     if (!isPlayerMaster(roomState, player)) {
       return {state}
     }
@@ -574,7 +563,10 @@ function onInGameMove(player, move, roomState) {
     resetBattleData(roomState)
 
     // end game
-    if (state.tileAttackRound+1 == state.tileAttackOrder.length || checkIfOnlyOneSurvivor(roomState)) {
+    if (state.tileAttackRound+1 == state.tileAttackOrder.length || checkIfOnlyOneSurvivor(roomState) == 1) {
+      // logger.info("GamePhase.EndGame 1 ", state.tileAttackOrder.length)
+      // logger.info("GamePhase.EndGame 2 ", checkIfOnlyOneSurvivor(roomState))
+      // logger.info("GamePhase.EndGame 3 ", (state.tileAttackRound+1 == state.tileAttackOrder.length))
       state.gamePhase = GamePhase.EndGame
     } else {
       if (checkIfNextRoundShouldBeSkipped(roomState)) {
@@ -593,7 +585,8 @@ function onInGameMove(player, move, roomState) {
 function checkIfNextRoundShouldBeSkipped(roomState) { 
   const { state, players, logger } = roomState;
 
-  const nextRoundAttacker = getCurrentPlayerIdFromNextAttackOrder(roomState, state.tileAttackOrder+1)
+  const nextRoundAttacker = state.playerIdToPlayerState[getCurrentPlayerIdFromNextAttackOrder(roomState, state.tileAttackRound+1)]
+
   if (nextRoundAttacker.mapSections.length ==  0 ) {
     return true
   }
@@ -606,7 +599,7 @@ function checkIfOnlyOneSurvivor(roomState) {
   let surviors = 0
   Object.entries(state.playerIdToPlayerState).map(([playerId, player]) => { 
    
-    if (player.mapSections.length >0) {
+    if (player.mapSections.length > 0) {
       surviors++
     }
   })
@@ -635,6 +628,9 @@ function updateWinner(roomState) {
     const winnerId = state.answerPlacements[0]
     // for now only if the attacker wins we give him the tile 
     // nothing happens if the defender wins or if
+    // logger.info("updateWinner attackerId : ", attackerId)
+    // logger.info("updateWinner winnerId : ", winnerId)
+    // logger.info("updateWinner state.tileAttackDefenderTile : ", state.tileAttackDefenderTile)
     if (attackerId == winnerId) {
       // remove the tile from the defender
       defender.mapSections = removeItem(defender.mapSections, state.tileAttackDefenderTile) 
@@ -660,6 +656,7 @@ function getCurrentPlayerIdFromNextAttackOrder(roomState, attackRound) {
     }
   })
 
+  // logger.info("playerIdFromOrder : ", playerIdFromOrder)
   return playerIdFromOrder
 }
 function getCurrentPlayerIdFromAttackOrder(roomState) { 
@@ -691,13 +688,16 @@ function getOpponents(roomState, currentPlayerId) {
 function getPlayerFromTile(roomState, tile) {
   const { state, players, logger } = roomState;
 
+  // logger.info("getPlayerFromTile tile : ", tile)
   let playerToReturn = null
   Object.entries(state.playerIdToPlayerState).map(([playerId, player]) => { 
+    // logger.info("getPlayerFromTile player.mapSections : ", player.mapSections)
     if (player.mapSections.includes(tile)) {
-      playerToReturn = player
+      playerToReturn = playerId
       return playerToReturn
     }
   })
+  // logger.info("getPlayerFromTile  playerToReturn : ", playerToReturn)
   return playerToReturn
 }
 function fillTilesFromEmptyTileBattle(roomState) { 
@@ -815,15 +815,21 @@ function battleCorrectAnswers(roomState) {
   const attacker = state.playerIdToPlayerState[attackerId]
   const defender = state.playerIdToPlayerState[state.tileAttackDefender]
   
+  // logger.info("battleCorrectAnswers attacker: ", attacker)
+  // logger.info("battleCorrectAnswers defender: ", defender)
   if (attacker.answer == null && defender.answer == null) {
     state.answerPlacements = [] // no winner
   } else if (attacker.answer == state.question.correctAnswer && defender.answer != state.question.correctAnswer) {
     state.answerPlacements = [attackerId] // attacker wins
   } else if (defender.answer == state.question.correctAnswer && attacker.answer != state.question.correctAnswer)  { 
     state.answerPlacements = [defender] // defender wins
-  } {
+  } else {
     state.answerPlacements = [] // it's a tie no one wins for now
   }
+  // logger.info("battleCorrectAnswers attacker.answer: ", attacker.answer)
+  // logger.info("battleCorrectAnswers state.question.correctAnswer: ", state.question.correctAnswer)
+  // logger.info("battleCorrectAnswers defender.answer: ", defender.answer)
+  // logger.info("battleCorrectAnswers : ", state.answerPlacements)
 }
 function createBotAnswersPick(roomState) { 
   const { state, players, logger } = roomState;
@@ -831,10 +837,8 @@ function createBotAnswersPick(roomState) {
   const attacker = state.playerIdToPlayerState[attackerId]
   const defender = state.playerIdToPlayerState[state.tileAttackDefender]
 
-  logger.info("attackerid: ", attackerId)
-  logger.info("state.tileAttackDefender: ", state.tileAttackDefender)
-  logger.info("attacker: ", attacker)
-  logger.info("defender: ", defender)
+  // logger.info("attacker : ", attacker)
+  // logger.info("defender : ", defender)
   if (attacker.isBot) {
     generateBotAnswersPick(roomState, attacker)
   }
@@ -842,6 +846,8 @@ function createBotAnswersPick(roomState) {
   if (defender.isBot) {
     generateBotAnswersPick(roomState, defender)
   }
+  // logger.info("attacker picked: ", attacker)
+  // logger.info("defender picked: ", defender)
 }
 
 function generateBotAnswersPick(roomState, bot) { 

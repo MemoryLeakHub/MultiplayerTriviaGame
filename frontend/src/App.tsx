@@ -13,6 +13,7 @@ import GameUIQuestion from "./GameUIQuestion"
 import "./styles.css"
 import GameUIQuestionPicker from "./GameUIQuestionPicker";
 import GameUIEndGame from "./GameUIEndGame";
+import GameUIShowRoundStage from "./GameUIShowRoundStage";
 function App() {
   const canvasEle = useRef(null);
   const [roomState, setRoomState] = useState(client.getRoomState() || {});
@@ -32,6 +33,10 @@ function App() {
       gamePhase = "",
       playerIdToPlayerState = {},
       question = {},
+      tileAttackRound = 0,
+      tileAttackOrder = [],
+      tileAttackDefender = null,
+      answerPlacements = [],
       mapConnectedSections = [],
       phaseTimerStart = null,
       phaseTimerTotal = null
@@ -40,11 +45,13 @@ function App() {
     players = [], finished,
   } = roomState;
 
-  const onTileClick = (tile: number) => {
+  const onTileClick = (tile: number,currentGamePhase: string) => {
       let tileClickEvent = "PickTilePlayerAction"
-      if (gamePhase == "PickTileToAttack") {
-        tileClickEvent = "PickTileToAttackBattleAnswerPlayerAction"
+      if (currentGamePhase == "PickTileToAttack") {
+        tileClickEvent = "PickTileToAttackPlayerAction"
       }
+      // console.log("onTileClick gamePhase: ", currentGamePhase)
+      // console.log("onTileClick: ", tileClickEvent)
       client.makeMove({ InGameMoveStatusClient: tileClickEvent, data: {tile:tile} }).then(({ error }) => {
         if (error != null) {
           throw new Error(error.message);
@@ -55,7 +62,7 @@ function App() {
           autoHideDuration: 3000,
         });
       });
-    
+      
   };
 
   useEffect(() => {
@@ -81,7 +88,7 @@ function App() {
       const intervalId = setInterval(() => {  
         var left = Math.round(getTimeLeftSecs(phaseTimerStart, phaseTimerTotal))
      
-        console.log("time : " + left);
+        // console.log("time : " + left);
         if (left <= 0) {
           if (roomState.state.playerIdToPlayerState[curPlr.id].isMaster) {
             if (gamePhase == "PickStartingTile") {
@@ -175,8 +182,8 @@ function App() {
   
   useEffect(() => {
     const onStateChanged = (newBoardGame) => {
-      console.log("state changed")
-      console.log(newBoardGame)
+      // console.log("state changed")
+      // console.log(newBoardGame)
       setRoomState(newBoardGame);
     };
     client.events.on('stateChanged', onStateChanged);
@@ -206,8 +213,8 @@ function App() {
       }
     }
 
-    console.log("updated roomState 222 ")
-    console.log(roomState)
+    // console.log("updated roomState 222 ")
+    // console.log(roomState)
   }, [assetsFinishedLoading, status, gamePhase, curPlr, playerIdToPlayerState]);
 
   useEffect(() => {
@@ -265,8 +272,8 @@ function App() {
     });
     game.loader.load((loader, resources) => {
       
-          console.log("Resources Loaded");
-          console.log(resources);
+          // console.log("Resources Loaded");
+          // console.log(resources);
 
           // This is our board + the walls
           const boardContainer = new Container();
@@ -326,6 +333,7 @@ function App() {
       });
     });
   }
+
   const onLoginClick = username => {
     client.makeMove({ username: username }).then(({ error }) => {
       if (error != null) {
@@ -370,17 +378,23 @@ function App() {
 
                 <GameUIPhaseProgress timeLeft={timeLeft} phase={gamePhase}/>
                 {
-                  (gamePhase == "EmptyTileBattle" || gamePhase == "ShowEmptyTileBattleAnswers") ? 
+                  (gamePhase === "EmptyTileBattle" || gamePhase === "ShowEmptyTileBattleAnswers") ? 
                   <GameUIQuestion state={roomState.state} curPlayer={curPlr} onAnswer={onAnswerNumberClick} />
                   : ""
                 }
                 {
-                  (gamePhase == "PickTileToAttackBattle" || gamePhase == "ShowAnswersPickTileToAttackBattle") ? 
+                  (gamePhase === "PickTileToAttackBattle" || gamePhase === "ShowAnswersPickTileToAttackBattle") ? 
                   <GameUIQuestionPicker state={roomState.state} curPlayer={curPlr} onAnswer={onAnswerPickClick} />
                   : ""
                 }
                 {
-                  (gamePhase == "EndGame" ) ? 
+                 
+                 (gamePhase === "PickTileToAttack" || gamePhase === "PickTileToAttackBattle" || gamePhase === "ShowAnswersPickTileToAttackBattle") ? 
+                   <GameUIShowRoundStage state={roomState.state} />
+                   : ""
+                }
+                {
+                  (gamePhase === "EndGame" ) ? 
                   <GameUIEndGame />
                   : ""
                 }

@@ -66,12 +66,12 @@ export class BoardTile {
   tileBlurFilter = [new filters.BlurFilter(8)]
   currentTileType: TileType = TileType.NONE
   isAnimating: Boolean = false
- 
+  currentGamePhase: string = ""
   worthText = new Text("200", style);
   roomStateLocal: any
   constructor(
     public props: {
-      onTileClick: ((tile: number) => void),
+      onTileClick: ((tile: number, gamePhase: string) => void),
       config: BoardTileConfig;
       boardContainer: Container;
       boardTilesContainer: Container;
@@ -202,6 +202,7 @@ export class BoardTile {
     if (roomState === undefined) {
       return;
     }
+    this.currentGamePhase = roomState.state.gamePhase
     this.roomStateLocal = roomState
     this.updateWorthText(roomState)
 
@@ -246,6 +247,19 @@ export class BoardTile {
       } 
     });
      
+    // console.log("roomState.state.tileAttackDefenderTile : ", roomState.state.tileAttackDefenderTile)
+    // console.log("this.props.config.tilePosition : ", this.props.config.tilePosition)
+    if (roomState.state.tileAttackDefenderTile == this.props.config.tilePosition) {
+        const attackerType = roomState.state.tileAttackOrder[roomState.state.tileAttackRound]
+        //console.log("attackerType : ", attackerType)
+        if (attackerType == TileType.PLAYER_BLUE) {
+          this.bluePeon.alpha = 1
+        } else if (attackerType == TileType.PLAYER_GREEN)  {
+          this.greenPeon.alpha = 1
+        } else {
+          this.redPeon.alpha = 1;
+        }
+    }
   }
   private updateWorthText(roomState: any) { 
     // console.log("this.props.roomState.mapConnectedSections")
@@ -263,7 +277,7 @@ export class BoardTile {
     //console.log("current Number : " + count + " texture : " + this.tileSprite.texture.textureCacheIds)
   }
   private onTileClick() { 
-    this.props.onTileClick(this.props.config.tilePosition)
+    this.props.onTileClick(this.props.config.tilePosition,  this.currentGamePhase)
     //client.makeMove({ InGameMoveStatusClient: "PickTilePlayerAction", tile: this.props.config.tilePosition });
     // console.log(this.container.children)
     // if (this.isAnimating) {
