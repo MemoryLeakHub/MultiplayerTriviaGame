@@ -262,7 +262,7 @@ function App() {
       "./assets/atlas_tiles_14.json",
       "./assets/peons.json",
       "./assets/x_tile.png"
-    ].forEach(r => { game.loader.add(r); });
+    ].forEach(r => { game.loader.add(r, {crossOrigin: 'anonymous'}); });
     game.loader.onProgress.add((loader, resources) => { 
       setPreLoadProgress(loader.progress)
       if (Math.round(loader.progress) === 100) {
