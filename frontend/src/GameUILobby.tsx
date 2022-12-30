@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react"
 import GameUILobbyPlayer from "./GameUILobbyPlayer";
 
 function GameUILobby({playerIdToPlayerState, onStartGameClick, curPlayer}: {playerIdToPlayerState, onStartGameClick: any, curPlayer}) {
@@ -16,7 +15,7 @@ function GameUILobby({playerIdToPlayerState, onStartGameClick, curPlayer}: {play
               );
             })
           }
-          {(Object.entries(playerIdToPlayerState).length == 3 && playerIdToPlayerState[curPlayer.id].isMaster) ? 
+          {(Object.entries(playerIdToPlayerState).length === 3 && playerIdToPlayerState[curPlayer.id].isMaster) ? 
           <button type="button" className=" btn btn-hollow-play h-[47px] w-full mt-4" onClick={()=> {onStartGameClick()}} > START GAME </button>
             :
             <button type="button" className=" btn btn-hollow-not-ready h-[47px] w-full mt-4 cursor-not-allowed" disabled> START GAME </button>

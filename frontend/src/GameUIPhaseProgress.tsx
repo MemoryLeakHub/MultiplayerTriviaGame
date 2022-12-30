@@ -4,17 +4,17 @@ function GameUIPhaseProgress({timeLeft, phase}: {timeLeft, phase}) {
 
   const [key, setKey] = useState(0);
   const phaseText = () => {
-    if (phase == "PickStartingTile") {
+    if (phase === "PickStartingTile") {
       return "Pick Your Starting Tile"
-    } else if (phase == "PickEmptyTile") {
+    } else if (phase === "PickEmptyTile") {
       return "Pick 2 Empty tiles"
-    } else if (phase == "EmptyTileBattle") {
+    } else if (phase === "EmptyTileBattle") {
       return "Give Your Answer"
-    } else if (phase == "PickTileToAttack") {
+    } else if (phase === "PickTileToAttack") {
       return "Choose tile to attack"
-    }  else if (phase == "PickTileToAttackBattle") {
+    }  else if (phase === "PickTileToAttackBattle") {
       return "Pick Answer"
-    }  else if (phase == "ShowAnswersPickTileToAttackBattle") {
+    }  else if (phase === "ShowAnswersPickTileToAttackBattle") {
       return "Battle Results"
     }  else { 
       return ""
@@ -23,7 +23,7 @@ function GameUIPhaseProgress({timeLeft, phase}: {timeLeft, phase}) {
 
   useEffect(() => {
     setKey(key+1)
-  }, [phase]);
+  }, [phase, key]);
   return (
     <div className="w-[200px] h-[220px] absolute top-[200px] left-2 ">
       <div className=" relative">

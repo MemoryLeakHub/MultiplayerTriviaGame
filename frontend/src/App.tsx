@@ -167,7 +167,7 @@ function App() {
       return () => clearInterval(intervalId); //This is important
   
     }
-  }, [phaseTimerStart, phaseTimerTotal, gamePhase ]);
+  }, [phaseTimerStart, phaseTimerTotal, gamePhase, curPlr.id, enqueueSnackbar, roomState.state.playerIdToPlayerState ]);
 
   
   useEffect(() => {
@@ -203,18 +203,17 @@ function App() {
       }
     }
 
-    // console.log("updated roomState 222 ")
-    // console.log(roomState)
-  }, [assetsFinishedLoading, status, gamePhase, curPlr, playerIdToPlayerState]);
+  }, [assetsFinishedLoading, status, gamePhase, curPlr, playerIdToPlayerState, roomState]);
 
   useEffect(() => {
     console.log("gamePhase tiles : " + gamePhase)
     if (tiles !== null) {
       tiles.map((currentTile:BoardTile) => {
         currentTile.updateState(roomState)
+        return null;
       })
     }
-  }, [roomState,tiles]);
+  }, [roomState,tiles, gamePhase]);
 
   useEffect(() => {
     // On first render create our application
@@ -297,7 +296,7 @@ function App() {
       // On unload completely destroy the application and all of it's children
       game.destroy(true, true);
     };
-  }, []);
+  });
 
   const onAnswerNumberClick = answer  => {
     client.makeMove({ InGameMoveStatusClient: "PickAnswerPlayerAction", data: {answer:answer} }).then(({ error }) => {

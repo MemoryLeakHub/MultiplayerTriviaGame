@@ -1,6 +1,5 @@
-import { Container, Sprite, Graphics, BLEND_MODES, filters, Ticker, TextStyle, Text, uniformParsers } from "pixi.js";
+import { Container, Sprite, Graphics,  filters, Ticker, TextStyle, Text } from "pixi.js";
 
-import client from '@urturn/client'
 export enum TileType {
   PLAYER_RED,
   PLAYER_BLUE,
@@ -117,7 +116,7 @@ export class BoardTile {
     this.battlePeonContainer.addChild(this.greenPeon)
     this.battlePeonContainer.addChild(this.bluePeon)
     this.battlePeonContainer.addChild(this.redPeon)
-    if (props.config.xInner != -1) {
+    if (props.config.xInner !== -1) {
       this.textContainer.x = props.config.xInner;
       this.xTileSprite.x = props.config.xInner;
       this.greenPeon.x = props.config.xInner;
@@ -130,7 +129,7 @@ export class BoardTile {
       this.bluePeon.x = this.container.width/2-10;
       this.redPeon.x = this.container.width/2+10;
     }
-    if (props.config.yInner != -1) {
+    if (props.config.yInner !== -1) {
       this.xTileSprite.y = props.config.yInner;
       this.textContainer.y = props.config.yInner;
       this.greenPeon.y = props.config.yInner;
@@ -217,7 +216,7 @@ export class BoardTile {
     Object.values(players).forEach(player => {
       const playerHasTileInBattle = player.mapSections.includes( this.props.config.tilePosition)
       
-      if (player.mapSections.length != 0 && playerHasTileInBattle ) {
+      if (player.mapSections.length !== 0 && playerHasTileInBattle ) {
         this.props.config.tileType = player.type
         this.tileSprite.texture = this.getTileSprite(atlas, this.props.config.tileType).texture;
       } 
@@ -236,7 +235,7 @@ export class BoardTile {
    
     Object.values(players).forEach(player => {
       const playerHasTileInBattle = player.battleForTile.includes( this.props.config.tilePosition)
-      if (player.battleForTile.length != 0 && playerHasTileInBattle ) {
+      if (player.battleForTile.length !== 0 && playerHasTileInBattle ) {
         if (player.type === TileType.PLAYER_BLUE) {
           this.bluePeon.alpha = 1
         } else if (player.type === TileType.PLAYER_GREEN)  {

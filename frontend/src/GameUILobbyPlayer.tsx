@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react"
-
 function GameUILobbyPlayer({player}: {player}) {
   return (
     <div className={ "w-[250px] rounded-lg mt-2" }>
