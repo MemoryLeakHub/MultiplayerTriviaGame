@@ -14,7 +14,7 @@ function GameUIQuestion({state, curPlayer, onAnswer}) {
   const [answer, setAnswer] = useState("");
   const onAnswerClick = () => {
     // only if we have not answered already
-    if (player.answer == null) {
+    if (player.answer === null) {
       onAnswer(answer)
     }
   }

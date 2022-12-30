@@ -11,15 +11,15 @@ function GameUIShowRoundStage({state}) {
 
             let style = " rounded-full w-[20px] h-[20px] "
 
-            if (value == TileType.PLAYER_BLUE) {
+            if (value===TileType.PLAYER_BLUE) {
               style += " bg-blue-700 "
-            } else if (value == TileType.PLAYER_GREEN) {
+            } else if (value === TileType.PLAYER_GREEN) {
               style += " bg-green-700 "
             } else {
               style += " bg-red-700 "
             }
             
-            if (index == state.tileAttackRound) {
+            if (index === state.tileAttackRound) {
               style += " opacity-100 border-2 border-yellow-300 shadow-lg shadow-indigo-500/40 animate-bounce "
             } else {
               style += " opacity-30 "

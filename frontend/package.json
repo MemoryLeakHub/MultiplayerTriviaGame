@@ -9,7 +9,6 @@
     "@emotion/styled": "^11.10.5",
     "@mui/material": "^5.11.2",
     "@urturn/client": "0.4.0",
-    "easytimer.js": "^4.5.4",
     "notistack": "^2.0.8",
     "pixi.js": "^6.5.8",
     "react": "^18.2.0",
