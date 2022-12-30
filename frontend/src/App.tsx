@@ -24,7 +24,6 @@ function App() {
   const [assetsFinishedLoading, setAssetsFInishedLoading] = useState(false)
 
   const { enqueueSnackbar } = useSnackbar();
-
   const [timeLeft, setTimeLeft] = useState(0)
   const {
     state: {
@@ -37,6 +36,7 @@ function App() {
   } = roomState;
 
   const onTileClick = (tile: number,currentGamePhase: string) => {
+
       let tileClickEvent = "PickTilePlayerAction"
       if (currentGamePhase === "PickTileToAttack") {
         tileClickEvent = "PickTileToAttackPlayerAction"
@@ -57,6 +57,7 @@ function App() {
   };
 
   useEffect(() => {
+    
     const setupCurPlr = async () => {
       const newCurPlr = await client.getLocalPlayer();
       setCurPlr(newCurPlr);
@@ -72,6 +73,7 @@ function App() {
   }
 
   useEffect(() => {
+   
     if (phaseTimerStart !== null && phaseTimerTotal !== null ) {
       
       var timeLeft = Math.round(getTimeLeftSecs(phaseTimerStart, phaseTimerTotal))
@@ -167,10 +169,12 @@ function App() {
       return () => clearInterval(intervalId); //This is important
   
     }
-  }, [phaseTimerStart, phaseTimerTotal, gamePhase, curPlr.id, enqueueSnackbar, roomState.state.playerIdToPlayerState ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phaseTimerStart, phaseTimerTotal, gamePhase ]);
 
   
   useEffect(() => {
+
     const onStateChanged = (newBoardGame) => {
       // console.log("state changed")
       // console.log(newBoardGame)
@@ -184,6 +188,7 @@ function App() {
 
   // on gamestate phase change
   useEffect(() => {
+    console.log(333)
     if (!assetsFinishedLoading) {
       return;
     }
@@ -203,9 +208,11 @@ function App() {
       }
     }
 
-  }, [assetsFinishedLoading, status, gamePhase, curPlr, playerIdToPlayerState, roomState]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [assetsFinishedLoading, status, gamePhase, curPlr, playerIdToPlayerState]);
 
   useEffect(() => {
+
     console.log("gamePhase tiles : " + gamePhase)
     if (tiles !== null) {
       tiles.map((currentTile:BoardTile) => {
@@ -213,16 +220,19 @@ function App() {
         return null;
       })
     }
-  }, [roomState,tiles, gamePhase]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomState,tiles]);
 
   useEffect(() => {
+ 
+    console.log(2222)
     // On first render create our application
     const game = new Application({
       view: canvasEle.current!,
       width: 1200,
       height: 720
     });
-
+    // setGame(gameObj)
     // const setupCurPlr = async () => {
     //   const newCurPlr = await client.getLocalPlayer();
     //   setCurPlr(newCurPlr);
@@ -260,7 +270,7 @@ function App() {
       }
     });
     game.loader.load((loader, resources) => {
-      
+ 
           // console.log("Resources Loaded");
           // console.log(resources);
 
@@ -296,7 +306,8 @@ function App() {
       // On unload completely destroy the application and all of it's children
       game.destroy(true, true);
     };
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[]);
 
   const onAnswerNumberClick = answer  => {
     client.makeMove({ InGameMoveStatusClient: "PickAnswerPlayerAction", data: {answer:answer} }).then(({ error }) => {

@@ -49,6 +49,7 @@ function GameUIQuestionPicker({state, curPlayer, onAnswer}) {
 
   function getCurrentPlayerIdFromAttackOrder(state) { 
     let playerIdFromAttackerOrder = ""
+    // eslint-disable-next-line array-callback-return
     Object.entries(state.playerIdToPlayerState).map(([playerId, player]: any) => { 
       if (player.type === state.tileAttackOrder[state.tileAttackRound]) {
         playerIdFromAttackerOrder =  playerId

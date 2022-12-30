@@ -23,7 +23,8 @@ function GameUIPhaseProgress({timeLeft, phase}: {timeLeft, phase}) {
 
   useEffect(() => {
     setKey(key+1)
-  }, [phase, key]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
   return (
     <div className="w-[200px] h-[220px] absolute top-[200px] left-2 ">
       <div className=" relative">
