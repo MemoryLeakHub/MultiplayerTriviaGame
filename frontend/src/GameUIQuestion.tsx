@@ -1,5 +1,4 @@
 import { useState } from "react";
-import {TileType} from "./BoardTile"
 import GameUIQuestionNumberPlayer from "./GameUIQuestionNumberPlayer"
 function GameUIQuestion({state, curPlayer, onAnswer}) {
   // {
