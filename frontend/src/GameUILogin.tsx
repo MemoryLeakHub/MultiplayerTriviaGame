@@ -2,7 +2,7 @@ import {  useState } from "react"
 
 function GameUiLogin({preLoadProgress, showLogin, onLoginClick}: {preLoadProgress: number, showLogin: boolean, onLoginClick: any}) {
   const [username, setUsername] = useState("");
-
+//test test 
   const currentProgress = preLoadProgress
   const progressStyle = {
     width: currentProgress+"%"
